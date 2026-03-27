@@ -1,0 +1,268 @@
+"use server";
+
+import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+
+export async function getOrCreateConversation(propertyId: string, landlordId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Check if conversation exists
+  const { data: existing } = await supabase
+    .from("conversations")
+    .select("*")
+    .eq("property_id", propertyId)
+    .eq("tenant_id", user.id)
+    .single();
+
+  if (existing) return { conversation: existing };
+
+  // Create new conversation
+  const { data, error } = await supabase
+    .from("conversations")
+    .insert({
+      property_id: propertyId,
+      tenant_id: user.id,
+      landlord_id: landlordId,
+    })
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+  return { conversation: data };
+}
+
+export async function sendMessage(conversationId: string, content: string, messageType: string = "text") {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase.from("messages").insert({
+    conversation_id: conversationId,
+    sender_id: user.id,
+    content,
+    message_type: messageType,
+  });
+
+  if (error) return { error: error.message };
+
+  await supabase
+    .from("conversations")
+    .update({ updated_at: new Date().toISOString() })
+    .eq("id", conversationId);
+
+  revalidatePath(`/conversations/${conversationId}`);
+  return { success: true };
+}
+
+export async function getConversations() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return [];
+
+  const { data } = await supabase
+    .from("conversations")
+    .select("*, property:properties(id, title, images, city, price_per_month), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
+    .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`)
+    .neq('deletion_status', 'deleted')
+    .order("updated_at", { ascending: false });
+
+  // Fetch the latest message for each conversation
+  if (data) {
+    for (const conv of data) {
+      const { data: msgs } = await supabase
+        .from("messages")
+        .select("*")
+        .eq("conversation_id", conv.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+      conv.latest_message = msgs?.[0] || null;
+    }
+  }
+
+  return data ?? [];
+}
+
+export async function getConversation(id: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+
+  const { data } = await supabase
+    .from("conversations")
+    .select("*, property:properties(id, title, images, city, price_per_month, provider_id), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
+    .eq("id", id)
+    .single();
+
+  return data;
+}
+
+export async function getMessages(conversationId: string) {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("messages")
+    .select("*, sender:profiles!sender_id(*)")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: true });
+
+  return data ?? [];
+}
+
+export async function createBookingRequest(
+  conversationId: string,
+  propertyId: string,
+  checkIn: string,
+  checkOut: string,
+  totalNights: number,
+  proposedPrice: number,
+  note: string
+) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data, error } = await supabase
+    .from("booking_requests")
+    .insert({
+      conversation_id: conversationId,
+      property_id: propertyId,
+      tenant_id: user.id,
+      check_in: checkIn,
+      check_out: checkOut,
+      total_nights: totalNights,
+      proposed_price: proposedPrice,
+      note,
+    })
+    .select()
+    .single();
+
+  if (error) return { error: error.message };
+
+  // Update conversation status
+  await supabase
+    .from("conversations")
+    .update({ status: "booking_requested", updated_at: new Date().toISOString() })
+    .eq("id", conversationId);
+
+  // Send system message
+  await sendMessage(
+    conversationId,
+    `📋 Booking Request: ${checkIn} → ${checkOut} (${totalNights} nights) — $${proposedPrice}${note ? `\nNote: ${note}` : ""}`,
+    "booking_request"
+  );
+
+  revalidatePath(`/conversations/${conversationId}`);
+  return { booking: data };
+}
+
+export async function respondToBooking(bookingId: string, conversationId: string, accept: boolean) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const newStatus = accept ? "accepted" : "rejected";
+
+  const { error } = await supabase
+    .from("booking_requests")
+    .update({ status: newStatus })
+    .eq("id", bookingId);
+
+  if (error) return { error: error.message };
+
+  await supabase
+    .from("conversations")
+    .update({
+      status: accept ? "confirmed" : "active",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", conversationId);
+
+  await sendMessage(
+    conversationId,
+    accept ? "✅ Booking request has been ACCEPTED! The room is confirmed." : "❌ Booking request has been REJECTED.",
+    accept ? "booking_confirmed" : "booking_rejected"
+  );
+
+  revalidatePath(`/conversations/${conversationId}`);
+  return { success: true };
+}
+
+export async function getBookingRequests(conversationId: string) {
+  const supabase = await createClient();
+
+  const { data } = await supabase
+    .from("booking_requests")
+    .select("*")
+    .eq("conversation_id", conversationId)
+    .order("created_at", { ascending: false });
+
+  return data ?? [];
+}
+
+export async function getUnreadConversationCount() {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  // Count conversations with messages not from the current user that are newer than
+  // we'll simplify: just count conversations for now
+  const { count } = await supabase
+    .from("conversations")
+    .select("*", { count: "exact", head: true })
+    .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`);
+
+  return count ?? 0;
+}
+
+export async function requestConversationDeletion(conversationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("conversations")
+    .update({ 
+      deletion_requested_by: user.id,
+      deletion_status: 'requested',
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", conversationId)
+    .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`);
+
+  if (error) return { error: error.message };
+
+  // Send a system message to notify the other party
+  await sendMessage(
+    conversationId,
+    "🗑️ The other party has requested to delete this conversation. Do you agree?",
+    "system"
+  );
+
+  revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath('/conversations');
+  return { success: true };
+}
+
+export async function confirmConversationDeletion(conversationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Update status to 'deleted' (We won't actually DROP the row to preserve history if needed, 
+  // but we will filter it out from the UI)
+  const { error } = await supabase
+    .from("conversations")
+    .update({ 
+      deletion_status: 'deleted',
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", conversationId)
+    .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`);
+
+  if (error) return { error: error.message };
+
+  revalidatePath('/conversations');
+  return { success: true, redirect: true };
+}
