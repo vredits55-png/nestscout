@@ -94,6 +94,7 @@ export interface Message {
   sender_id: string;
   content: string;
   message_type: "text" | "booking_request" | "booking_confirmed" | "booking_rejected" | "system";
+  is_read: boolean;
   created_at: string;
   sender?: Profile;
 }

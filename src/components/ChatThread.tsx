@@ -1,8 +1,8 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition } from "react";
-import { Send, Calendar, CheckCircle, XCircle } from "lucide-react";
-import { sendMessage } from "@/actions/conversations";
+import { Send, Calendar, CheckCircle, XCircle, Check, CheckCheck } from "lucide-react";
+import { sendMessage, markMessagesAsRead } from "@/actions/conversations";
 import type { Message } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 
@@ -23,6 +23,11 @@ export default function ChatThread({ conversationId, currentUserId, initialMessa
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Mark messages as read when conversation opens
+  useEffect(() => {
+    markMessagesAsRead(conversationId);
+  }, [conversationId]);
+
   function handleSend(e: React.FormEvent) {
     e.preventDefault();
     if (!newMessage.trim()) return;
@@ -37,6 +42,7 @@ export default function ChatThread({ conversationId, currentUserId, initialMessa
       sender_id: currentUserId,
       content: msg,
       message_type: "text",
+      is_read: false,
       created_at: new Date().toISOString(),
     };
     setMessages((prev) => [...prev, optimistic]);
@@ -84,6 +90,17 @@ export default function ChatThread({ conversationId, currentUserId, initialMessa
     }
   }
 
+  function ReadReceipt({ msg }: { msg: Message }) {
+    const isOwn = msg.sender_id === currentUserId;
+    if (!isOwn || msg.message_type !== "text") return null;
+
+    return msg.is_read ? (
+      <CheckCheck className="w-3.5 h-3.5 text-blue-400 inline-block ml-1 shrink-0" />
+    ) : (
+      <Check className="w-3.5 h-3.5 text-white/50 inline-block ml-1 shrink-0" />
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
       {/* Messages */}
@@ -94,10 +111,11 @@ export default function ChatThread({ conversationId, currentUserId, initialMessa
               <div className={`rounded-2xl px-4 py-3 text-sm flex-1 ${getMessageBubbleStyle(msg)}`}>
                 {getIcon(msg.message_type)}
                 <span className="whitespace-pre-wrap">{msg.content}</span>
+                <ReadReceipt msg={msg} />
               </div>
             </div>
             
-            <span className={`text-[10px] text-text-light mt-1 px-2 ${msg.sender_id === currentUserId ? 'text-right' : ''}`}>
+            <span className={`text-[10px] text-text-light mt-1 px-2 flex items-center gap-1 ${msg.sender_id === currentUserId ? 'justify-end' : ''}`}>
               {msg.sender?.full_name && <span className="font-medium">{msg.sender.full_name} · </span>}
               {formatDistanceToNow(new Date(msg.created_at), { addSuffix: true })}
             </span>

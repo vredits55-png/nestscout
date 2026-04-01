@@ -15,10 +15,12 @@ function RegisterContent() {
   const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
 
-  async function handleSubmit(formData: FormData) {
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     setLoading(true);
     setError("");
     setSuccessMsg("");
+    const formData = new FormData(e.currentTarget);
     formData.set("role", role);
     const result = await signUp(formData);
     if (result?.error) {
@@ -44,7 +46,7 @@ function RegisterContent() {
         <div className="glass rounded-3xl p-8 sm:p-10 animate-fade-in-up">
           <div className="text-center mb-8">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mx-auto mb-4 shadow-glow">
-              <Hexagon className="w-8 h-8 text-white" />
+              <img src="/logo.png" alt="NestScout" className="w-12 h-12 object-contain" />
             </div>
             <h1 className="text-3xl font-bold text-text mb-2 tracking-tight">
               Initialize NestScout
@@ -93,7 +95,7 @@ function RegisterContent() {
             </div>
           )}
 
-          <form action={handleSubmit} className="space-y-6">
+          <form onSubmit={onSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-bold text-primary mb-2">
                 User Designation

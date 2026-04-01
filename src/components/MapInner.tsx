@@ -82,12 +82,19 @@ export default function MapInner({
     <MapContainer
       center={center}
       zoom={zoom}
-      className="w-full h-full rounded-2xl z-0"
+      minZoom={3}
+      maxBounds={[
+        [-90, -180],
+        [90, 180]
+      ]}
+      maxBoundsViscosity={1.0}
+      className="w-full h-full rounded-2xl z-0 bg-[#AAD3DF]"
       zoomControl={false}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        noWrap={true}
       />
       <BoundsTracker onBoundsChange={onBoundsChange} />
 

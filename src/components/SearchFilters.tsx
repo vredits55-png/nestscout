@@ -86,22 +86,23 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
 
   return (
     <div className={`${className}`}>
-      {/* Main Search Bar */}
-      <div className="glass rounded-2xl p-2 flex items-center gap-2 animate-fade-in-up">
-        <div className="flex-1 flex items-center gap-2 px-3">
-          <Search className="w-5 h-5 text-primary shrink-0" />
+      {/* Main Search Bar (Editorial Style) */}
+      <div className="bg-surface-container-lowest rounded-xl p-3 ambient-glow flex flex-col md:flex-row gap-4 items-center animate-fade-in-up transition-shadow duration-300">
+        
+        <div className="flex-1 w-full flex items-center gap-3 px-4 border-b-2 border-transparent focus-within:border-primary transition-all">
+          <Search className="w-5 h-5 text-outline shrink-0" />
           <input
             type="text"
             placeholder="Search by city, address, or title..."
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="w-full py-2.5 bg-transparent outline-none text-text placeholder:text-text-light"
+            className="w-full bg-transparent border-none focus:ring-0 py-3 text-on-surface placeholder:text-outline-variant font-body outline-none"
           />
           {keyword && (
             <button
               onClick={() => setKeyword("")}
-              className="text-text-light hover:text-text cursor-pointer p-1"
+              className="text-outline-variant hover:text-outline cursor-pointer p-1 transition-colors"
             >
               <X className="w-4 h-4" />
             </button>
@@ -110,81 +111,81 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
 
         <button
           onClick={() => setFiltersOpen(!filtersOpen)}
-          className={`btn btn-sm cursor-pointer ${
-            filtersOpen ? "btn-primary" : "btn-ghost"
+          className={`btn justify-center font-bold px-6 py-3 w-full md:w-auto transition-colors ${
+            filtersOpen ? "bg-surface-variant text-on-surface-variant" : "bg-transparent text-outline hover:bg-surface-container-low hover:text-on-surface"
           }`}
         >
-          <SlidersHorizontal className="w-4 h-4" />
-          <span className="hidden sm:inline">Filters</span>
+          <SlidersHorizontal className="w-5 h-5" />
+          <span className="md:hidden">Filters</span>
         </button>
 
         <button
           onClick={handleSearch}
           disabled={isPending}
-          className="btn btn-primary btn-sm cursor-pointer"
+          className="editorial-gradient text-on-primary w-full md:w-auto px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 active:scale-95 transition-all shadow-ambient cursor-pointer"
         >
           {isPending ? (
-            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
           ) : (
-            "Search"
+            <span className="flex items-center gap-2">Search</span>
           )}
         </button>
       </div>
 
       {/* Extended Filters */}
       {filtersOpen && (
-        <div className="glass rounded-2xl p-6 mt-3 animate-fade-in-up">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-text">
-              Filters
+        <div className="bg-surface-container-lowest rounded-2xl p-8 mt-4 ambient-glow animate-fade-in-up origin-top border border-outline-variant/30">
+          <div className="flex items-center justify-between mb-8">
+            <h3 className="text-2xl font-black font-headline text-on-surface">
+              Refine Search
             </h3>
             <button
               onClick={clearFilters}
-              className="text-sm text-primary hover:underline cursor-pointer flex items-center gap-1"
+              className="text-sm font-bold text-outline hover:text-on-surface transition-colors cursor-pointer flex items-center gap-1 uppercase tracking-widest"
             >
-              <X className="w-3.5 h-3.5" />
-              Clear All
+              <X className="w-4 h-4" />
+              Clear Options
             </button>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 mb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-8">
             <div>
-              <label className="input-label flex items-center gap-1">
-                <DollarSign className="w-3.5 h-3.5" />
+              <label className="input-label flex items-center gap-2 text-primary">
+                <DollarSign className="w-4 h-4" />
                 Min Price
               </label>
               <input
                 type="number"
-                placeholder="500"
+                placeholder="0"
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="input-field"
               />
             </div>
             <div>
-              <label className="input-label flex items-center gap-1">
-                <DollarSign className="w-3.5 h-3.5" />
+              <label className="input-label flex items-center gap-2 text-primary">
+                <DollarSign className="w-4 h-4" />
                 Max Price
               </label>
               <input
                 type="number"
-                placeholder="5000"
+                placeholder="Any"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="input-field"
               />
             </div>
             <div>
-              <label className="input-label flex items-center gap-1">
-                <Bed className="w-3.5 h-3.5" />
+              <label className="input-label flex items-center gap-2 text-primary">
+                <Bed className="w-4 h-4" />
                 Min Bedrooms
               </label>
               <select
                 value={bedrooms}
                 onChange={(e) => setBedrooms(e.target.value)}
-                className="input-field cursor-pointer"
+                className="input-field cursor-pointer font-bold"
               >
-                <option value="">Any</option>
+                <option value="">Any Range</option>
                 {[1, 2, 3, 4, 5].map((n) => (
                   <option key={n} value={n}>
                     {n}+
@@ -193,28 +194,28 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
               </select>
             </div>
             <div>
-              <label className="input-label flex items-center gap-1">
-                <ArrowUpDown className="w-3.5 h-3.5" />
+              <label className="input-label flex items-center gap-2 text-primary">
+                <ArrowUpDown className="w-4 h-4" />
                 Sort By
               </label>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as any)}
-                className="input-field cursor-pointer"
+                className="input-field cursor-pointer font-bold"
               >
-                <option value="newest">Newest First</option>
-                <option value="price_asc">Price: Low → High</option>
-                <option value="price_desc">Price: High → Low</option>
+                <option value="newest">Featured Newest</option>
+                <option value="price_asc">Price: Ascending</option>
+                <option value="price_desc">Price: Descending</option>
               </select>
             </div>
           </div>
 
-          <div className="mb-4">
-            <label className="input-label flex items-center gap-1">
-              <Building className="w-3.5 h-3.5" />
-              Property Type
+          <div className="mb-8">
+            <label className="input-label flex items-center gap-2 text-primary mb-3">
+              <Building className="w-4 h-4" />
+              Categorize Property
             </label>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-3">
               {PROPERTY_TYPES.map((type) => (
                 <button
                   key={type.value}
@@ -223,10 +224,10 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
                       propertyType === type.value ? "" : type.value
                     )
                   }
-                  className={`px-4 py-2 rounded-full text-sm font-medium cursor-pointer transition-all duration-300 ${
+                  className={`px-5 py-2 rounded-full text-sm font-bold cursor-pointer transition-all duration-300 font-headline uppercase tracking-wide border-2 ${
                     propertyType === type.value
-                      ? "bg-primary text-white shadow-md shadow-primary/30"
-                      : "glass text-text-muted hover:text-primary hover:shadow-glow"
+                      ? "bg-primary border-primary text-on-primary shadow-glow"
+                      : "bg-transparent border-outline-variant/50 text-outline hover:border-primary hover:text-primary"
                   }`}
                 >
                   {type.label}
@@ -236,16 +237,16 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
           </div>
 
           <div>
-            <label className="input-label">Amenities</label>
+            <label className="input-label text-primary mb-3">Curated Amenities</label>
             <div className="flex flex-wrap gap-2">
               {AMENITIES_LIST.map((amenity) => (
                 <button
                   key={amenity}
                   onClick={() => toggleAmenity(amenity)}
-                  className={`px-3 py-1.5 rounded-full text-xs font-medium cursor-pointer transition-all duration-300 ${
+                  className={`px-4 py-2 rounded-full text-sm font-bold cursor-pointer transition-all duration-300 font-body ${
                     selectedAmenities.includes(amenity)
-                      ? "bg-primary-light/20 text-primary border border-primary/30"
-                      : "glass text-text-muted hover:text-primary"
+                      ? "bg-primary-fixed text-on-primary-fixed shadow-ambient border-transparent"
+                      : "bg-surface-container text-on-surface-variant hover:bg-surface-variant border border-transparent"
                   }`}
                 >
                   {amenity}
@@ -254,10 +255,10 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
             </div>
           </div>
 
-          <div className="mt-4 flex justify-end">
-            <button onClick={handleSearch} className="btn btn-primary cursor-pointer">
-              Apply Filters
-            </button>
+          <div className="mt-8 pt-6 border-t border-outline-variant/20 flex justify-end">
+             <button onClick={handleSearch} className="btn-primary text-lg px-8 py-3 rounded-xl font-headline font-bold">
+               Apply Curated Filters
+             </button>
           </div>
         </div>
       )}

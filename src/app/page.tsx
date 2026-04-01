@@ -1,198 +1,229 @@
 "use client";
 
 import Link from "next/link";
-import { useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Search,
-  Shield,
   MapPin,
-  Star,
   ArrowRight,
-  Zap,
-  Building,
-  Users,
 } from "lucide-react";
 
+import { useEffect, useState } from "react";
+
 export default function HomePage() {
-  const containerRef = useRef<HTMLDivElement>(null);
+  const [listUrl, setListUrl] = useState("/register?role=provider");
+  
+  // Conditionally check if the current user is already a provider
+  // so the 'List a Property' button smartly redirects them to their dashboard
+  useEffect(() => {
+    const checkRole = async () => {
+       import("@/lib/supabase/client").then(({ createClient }) => {
+         const supabase = createClient();
+         supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) {
+              supabase.from("profiles").select("role").eq("id", user.id).single()
+               .then(({ data }) => {
+                 if (data?.role === "provider") {
+                   setListUrl("/provider/dashboard");
+                 }
+               });
+            }
+         });
+       });
+    };
+    checkRole();
+  }, []);
 
   return (
-    <div ref={containerRef} className="bg-white">
-      {/* ================== FLOOR 1: HERO (stays pinned, gets covered) ================== */}
-      <section className="h-screen sticky top-0 z-0 flex items-center justify-center overflow-hidden">
-        <div className="absolute inset-0 mesh-bg" />
+    <div className="bg-surface">
+      {/* ================== HERO SECTION ================== */}
+      <section className="relative px-8 py-12 md:py-24 max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[90vh]">
+        <div className="lg:col-span-6 space-y-8 animate-fade-in-up">
+          <h1 className="text-5xl md:text-7xl font-headline font-extrabold text-on-surface leading-[1.05] tracking-tight">
+            Find a home that <span className="text-primary italic">speaks</span> to you.
+          </h1>
+          <p className="text-xl text-on-surface-variant max-w-lg leading-relaxed animate-fade-in-up delay-75">
+            Moving beyond listings. We curate living spaces that reflect your personality, values, and vision for the future.
+          </p>
 
-        {/* Animated Orbs */}
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary-light/20 rounded-full blur-[100px] animate-breathe mix-blend-multiply" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-[100px] animate-breathe delay-500 mix-blend-multiply" />
-
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative z-10 w-full text-center pt-24">
-          <div className="max-w-4xl mx-auto">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-8 text-primary font-medium animate-float">
-              <Zap className="w-4 h-4 text-cta" />
-              <span>The Future of Premium Rentals</span>
+          {/* Editorial Search Bar Link (Instead of building full search form here) */}
+          <div className="bg-surface-container-lowest rounded-xl p-3 ambient-glow flex flex-col md:flex-row gap-4 items-center animate-fade-in-up delay-150">
+            <div className="flex-1 w-full flex items-center gap-3 px-4 border-b-2 border-transparent transition-all">
+              <MapPin className="text-outline w-5 h-5 block" />
+              <input readOnly className="w-full bg-transparent border-none focus:ring-0 py-3 text-on-surface placeholder:text-outline-variant cursor-pointer" placeholder="Where to?" type="text" onClick={() => window.location.href='/search'}/>
             </div>
-
-            <h1 className="text-6xl sm:text-8xl font-bold leading-[1.05] mb-8 text-transparent bg-clip-text bg-gradient-to-r from-primary via-primary-light to-accent animate-fade-in-up">
-              Discover spaces that feel alive.
-            </h1>
-
-            <p className="text-xl text-text-muted max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-in-up delay-150">
-              Experience the next generation of housing exploration with real-time dynamic mapping, verified owners, and immersive property tours.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up delay-300">
-              <Link href="/search" className="btn btn-primary sm:w-auto w-full group text-lg px-8 py-4">
-                <Search className="w-5 h-5 mr-2" />
-                Explore Rentals
-                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-              </Link>
-              <Link href="/register?role=provider" className="btn btn-ghost sm:w-auto w-full text-lg px-8 py-4">
-                List Your Property
-              </Link>
-            </div>
+            <Link href="/search" className="editorial-gradient text-on-primary w-full md:w-auto px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
+              <Search className="w-5 h-5 block" />
+              Search Options
+            </Link>
           </div>
-
-          {/* Floating Glass Cards */}
-          <div className="mt-16 relative h-[350px] w-full max-w-5xl mx-auto hidden md:block">
-            <div className="absolute top-8 left-[8%] glass p-4 rounded-2xl w-64 animate-float delay-150 transform -rotate-6">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full bg-primary-light/20 flex items-center justify-center">
-                  <MapPin className="w-6 h-6 text-primary" />
-                </div>
-                <div>
-                  <div className="text-sm font-bold">Downtown Loft</div>
-                  <div className="text-xs text-text-muted">$3,200/mo</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="absolute top-4 right-[12%] glass p-4 rounded-2xl w-72 animate-float delay-300 transform rotate-3">
-              <div className="w-full h-28 rounded-xl bg-gradient-to-br from-primary/10 to-accent/10 mb-3" />
-              <div className="h-2 w-3/4 bg-border rounded-full mb-2" />
-              <div className="h-2 w-1/2 bg-border rounded-full" />
-            </div>
-
-            <div className="absolute bottom-8 left-[30%] glass p-6 rounded-3xl w-96 animate-float delay-500 z-20 shadow-glow">
-              <h3 className="text-xl font-bold mb-2">Verified Owner</h3>
-              <p className="text-sm text-text-muted">Instant direct messaging enabled for this premium property.</p>
-            </div>
+        </div>
+        
+        <div className="lg:col-span-6 relative animate-slide-right delay-200">
+          <div className="grid grid-cols-2 gap-4">
+            <img alt="Luxury home exterior" className="w-full h-80 object-cover arch-mask-left shadow-2xl" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"/>
+            <img alt="Modern living room" className="w-full h-80 object-cover rounded-xl translate-y-12 shadow-ambient" src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80"/>
           </div>
+          {/* Decorative Elements */}
+          <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-surface-container-low rounded-full blur-[100px] opacity-70 animate-breathe"></div>
+        </div>
+      </section>
 
-          {/* Scroll hint */}
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 animate-breathe">
-            <span className="text-xs text-text-muted font-medium uppercase tracking-widest">Scroll Down</span>
-            <div className="w-6 h-10 border-2 border-primary/30 rounded-full flex justify-center pt-2">
-              <div className="w-1.5 h-3 bg-primary rounded-full animate-bounce" />
-            </div>
+      {/* ================== TRUST BANNER ================== */}
+      <section className="bg-inverse-surface py-16 mt-12 overflow-hidden">
+        <div className="max-w-[1440px] mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-12">
+          <div className="text-surface-variant font-headline text-lg uppercase tracking-widest opacity-60">Featured &amp; Trusted By</div>
+          <div className="flex flex-wrap justify-center gap-12 grayscale opacity-40">
+            <div className="text-white text-2xl font-black italic">ARCH-DIGEST</div>
+            <div className="text-white text-2xl font-black italic">DWELL</div>
+            <div className="text-white text-2xl font-black italic">VOGUE LIVING</div>
+            <div className="text-white text-2xl font-black italic">CURBED</div>
           </div>
         </div>
       </section>
 
-      {/* ================== FLOOR 2: VALUE PROP (slides over hero) ================== */}
-      <section className="min-h-screen sticky top-0 z-10 bg-white shadow-[0_-30px_60px_rgba(0,0,0,0.08)] flex items-center">
-        <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-cta/5 rounded-full blur-[120px]" />
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 w-full py-20">
-          <motion.div
+      {/* ================== TESTIMONIALS (Editorial Style) ================== */}
+      <section className="bg-surface-container-low py-24 px-8 overflow-hidden">
+        <div className="max-w-[1440px] mx-auto">
+          <motion.div 
             className="text-center mb-16"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.7 }}
-          >
-            <h2 className="text-5xl font-bold mb-4">Why choose NestScout?</h2>
-            <p className="text-text-muted text-lg">Built differently from the ground up.</p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: Shield,
-                title: "Guaranteed Security",
-                desc: "Every listing and user is cryptographically verified to eliminate scams entirely.",
-              },
-              {
-                icon: MapPin,
-                title: "Dynamic Exploration",
-                desc: "Our active map interface pulses with life, showing you real-time rental availability.",
-              },
-              {
-                icon: Star,
-                title: "Zero Middlemen",
-                desc: "Connect instantly with landlords through our secure internal messaging matrix.",
-              },
-            ].map((feature, i) => (
-              <motion.div
-                key={i}
-                className="nest-card p-8"
-                initial={{ opacity: 0, y: 40, scale: 0.95 }}
-                whileInView={{ opacity: 1, y: 0, scale: 1 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6, delay: i * 0.15 }}
-              >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center mb-6 shadow-glow transition-transform hover:scale-110 duration-300">
-                  <feature.icon className="w-7 h-7 text-white" />
-                </div>
-                <h3 className="text-2xl font-bold mb-3">{feature.title}</h3>
-                <p className="text-text-muted leading-relaxed">{feature.desc}</p>
-              </motion.div>
-            ))}
-          </div>
-
-          {/* Stats row */}
-          <motion.div
-            className="mt-16 grid grid-cols-3 gap-8 max-w-2xl mx-auto"
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6 }}
           >
-            {[
-              { value: "10k+", label: "Active Listings" },
-              { value: "25k+", label: "Happy Tenants" },
-              { value: "99%", label: "Verified Owners" },
-            ].map((stat) => (
-              <div key={stat.label} className="text-center">
-                <div className="text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">{stat.value}</div>
-                <div className="text-sm text-text-muted font-medium mt-1">{stat.label}</div>
-              </div>
-            ))}
+            <h2 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface mb-4">Stories of Belonging.</h2>
+            <p className="text-on-surface-variant max-w-xl mx-auto italic">How our members found more than just a roof over their heads.</p>
           </motion.div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            {/* Testimonial 1 */}
+            <motion.div 
+              className="bg-surface-container-lowest p-10 rounded-2xl ambient-glow flex flex-col md:flex-row gap-8 items-start hover:-translate-y-2 transition-transform duration-500"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+            >
+              <img alt="Sarah Jenkins" className="w-24 h-24 rounded-full object-cover grayscale" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80"/>
+              <div className="space-y-4">
+                <div className="flex text-primary">
+                  {Array.from({length: 5}).map((_, i) => (
+                    <span key={i} className="text-xl leading-none">★</span>
+                  ))}
+                </div>
+                <p className="text-lg leading-relaxed text-on-surface-variant italic font-body">
+                    "NestScout didn't just show me houses. They understood my need for natural light and creative energy. The curator I worked with found a loft that has completely transformed my workflow."
+                </p>
+                <div>
+                  <p className="font-bold text-on-surface font-headline">Sarah Jenkins</p>
+                  <p className="text-sm text-outline uppercase tracking-widest font-bold">Creative Director</p>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Testimonial 2 */}
+            <motion.div 
+              className="bg-surface-container-lowest p-10 rounded-2xl ambient-glow flex flex-col md:flex-row gap-8 items-start hover:-translate-y-2 transition-transform duration-500"
+              initial={{ opacity: 0, y: 40 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+            >
+              <img alt="Marcus Thorne" className="w-24 h-24 rounded-full object-cover grayscale border-2 border-surface-container-high" src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=200&q=80"/>
+              <div className="space-y-4">
+                <div className="flex text-primary">
+                  {Array.from({length: 5}).map((_, i) => (
+                    <span key={i} className="text-xl leading-none">★</span>
+                  ))}
+                </div>
+                <p className="text-lg leading-relaxed text-on-surface-variant italic font-body">
+                    "The editorial approach to real estate is refreshing. Every property recommended felt hand-picked for my specific lifestyle. It's the highest level of service I've experienced."
+                </p>
+                <div>
+                  <p className="font-bold text-on-surface font-headline">Marcus Thorne</p>
+                  <p className="text-sm text-outline uppercase tracking-widest font-bold">Tech Founder</p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      {/* ================== FLOOR 3: CTA (slides over value prop) ================== */}
-      <section className="min-h-[80vh] sticky top-0 z-20 flex items-center justify-center bg-primary shadow-[0_-30px_60px_rgba(0,0,0,0.15)] overflow-hidden">
-        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&q=80&w=2000')] bg-cover bg-center mix-blend-overlay opacity-20" />
-        <div className="absolute inset-0 bg-gradient-to-t from-primary via-transparent to-primary/80" />
-
-        <motion.div
-          className="max-w-4xl mx-auto px-4 sm:px-6 relative z-10 text-center"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-100px" }}
-          transition={{ duration: 0.7 }}
-        >
-          <h2 className="text-5xl font-bold mb-8 text-white drop-shadow-md">
-            Ready to shape the future of living?
-          </h2>
-          <p className="text-white/70 text-lg mb-10 max-w-xl mx-auto">
-            Join thousands of tenants and landlords already on the NestScout network.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-6">
-            <Link href="/register?role=client" className="btn btn-cta text-lg px-8 py-4">
-              Start Searching
-            </Link>
-            <Link href="/register?role=provider" className="btn btn-ghost text-lg px-8 py-4 !border-white/30 !text-white hover:!bg-white/10 hover:!border-white">
-              List a Property
-            </Link>
-          </div>
-        </motion.div>
+      {/* ================== CTA SECTION ================== */}
+      <section className="bg-surface py-24 px-8 relative overflow-hidden">
+         <div className="max-w-4xl mx-auto text-center relative z-10">
+            <motion.h2 
+              className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface mb-8"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+            >
+              Ready to shape the future of living?
+            </motion.h2>
+            <motion.div 
+              className="flex flex-col sm:flex-row justify-center gap-6"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.2 }}
+            >
+              <Link href="/search" className="btn btn-primary text-lg px-8 py-4">
+                Start Searching
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+              <Link href={listUrl} className="btn btn-ghost text-lg px-8 py-4">
+                List a Property
+              </Link>
+            </motion.div>
+         </div>
+         {/* Decorative blob */}
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] -z-0"></div>
       </section>
 
-      {/* Spacer to allow last sticky to unstick */}
-      <div className="h-20 bg-primary relative z-20" />
+      {/* ================== FOOTER ================== */}
+      <footer className="bg-inverse-surface text-on-primary-container">
+        <div className="w-full py-16 px-8 flex flex-col md:flex-row justify-between items-start max-w-[1440px] mx-auto gap-12">
+          <div className="space-y-6 max-w-sm">
+            <div className="text-white font-bold text-3xl font-headline flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white shadow-xl p-0.5">
+                <img src="/logo.png" alt="NestScout Logo" className="w-full h-full object-contain" />
+              </div>
+              NestScout
+            </div>
+            <p className="text-white/60 leading-relaxed font-body">
+                Curating the world's most evocative living spaces for the modern individual. A new standard in residential discovery.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-16 md:gap-24 w-full md:w-auto">
+            <div className="space-y-4">
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest font-headline">Company</h4>
+            <nav className="flex flex-col gap-3 font-body">
+              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/vision">The Vision</Link>
+              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/standards">Editorial Standards</Link>
+              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/careers">Careers</Link>
+            </nav>
+            </div>
+            <div className="space-y-4">
+            <h4 className="text-white font-bold text-sm uppercase tracking-widest font-headline">Support</h4>
+            <nav className="flex flex-col gap-3 font-body">
+              <div className="flex flex-col gap-1">
+                <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/contact">Contact Us</Link>
+                <a href="mailto:sandarbhs102@gmail.com" className="text-white/40 hover:text-white transition-colors text-xs">sandarbhs102@gmail.com</a>
+                <a href="tel:+916387360511" className="text-white/40 hover:text-white transition-colors text-xs">+91 638 736 0511</a>
+              </div>
+              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold mt-2" href="/privacy">Privacy Policy</Link>
+              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/terms">Terms</Link>
+            </nav>
+            </div>
+          </div>
+        </div>
+        <div className="max-w-[1440px] mx-auto px-8 py-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
+          <p className="text-white/50 text-xs uppercase tracking-widest font-bold">
+            © 2026 NestScout. Part of The Curated Hearth editorial network.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }

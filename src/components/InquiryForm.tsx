@@ -53,18 +53,15 @@ export default function InquiryForm({
 
   if (sent) {
     return (
-      <div className="glass rounded-2xl p-6 text-center animate-scale-in">
-        <div className="w-14 h-14 rounded-full bg-success/10 flex items-center justify-center mx-auto mb-3">
-          <CheckCircle className="w-7 h-7 text-success" />
+      <div className="text-center animate-scale-in py-8">
+        <div className="w-16 h-16 rounded-full bg-surface-container-low border-2 border-primary/20 flex flex-col items-center justify-center mx-auto mb-4 animate-breathe text-primary">
+          <CheckCircle className="w-8 h-8" />
         </div>
-        <h4
-          className="text-lg font-semibold text-text mb-1"
-          style={{ fontFamily: "var(--font-heading)" }}
-        >
-          Message Sent!
+        <h4 className="text-2xl font-black font-headline text-on-surface mb-2 tracking-tight">
+          Inquiry Pending
         </h4>
-        <p className="text-sm text-text-muted mb-3">
-          Opening your conversation about &ldquo;{propertyTitle}&rdquo;...
+        <p className="text-outline italic font-body mb-6 text-lg max-w-sm mx-auto">
+          We are currently directing you to the conversation room for &ldquo;{propertyTitle}&rdquo;...
         </p>
         <div className="w-6 h-6 border-2 border-primary/30 border-t-primary rounded-full animate-spin mx-auto" />
       </div>
@@ -72,42 +69,42 @@ export default function InquiryForm({
   }
 
   return (
-    <form onSubmit={handleSubmit} className="glass rounded-2xl p-5">
-      <h4
-        className="text-lg font-semibold text-text mb-3"
-        style={{ fontFamily: "var(--font-heading)" }}
-      >
-        Contact Property Owner
-      </h4>
-
+    <form onSubmit={handleSubmit} className="flex flex-col gap-6 w-full">
       {error && (
-        <div className="mb-3 p-3 rounded-xl bg-danger/10 text-danger text-sm animate-fade-in-up">
+        <div className="p-4 rounded-xl bg-error/20 text-error-container font-bold text-sm animate-fade-in-up border border-error/50">
           {error}
         </div>
       )}
 
-      <div className="mb-3">
-        <textarea
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder={`Hi, I'm interested in "${propertyTitle}". I'd love to learn more about...`}
-          rows={4}
-          className="input-field resize-none"
-          required
-        />
+      <div>
+        <label className="input-label text-white/50 uppercase tracking-widest text-xs mb-3 block font-bold">
+          Enquire To Lease
+        </label>
+        <div className="relative group">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder={`I am interested in "${propertyTitle}". Let's arrange a viewing...`}
+            rows={5}
+            className="w-full bg-white/5 border border-white/10 text-white placeholder:text-white/30 p-5 rounded-2xl resize-none transition-all duration-300 focus:bg-white/10 focus:border-primary/50 focus:ring-1 focus:ring-primary/50 outline-none font-body shadow-inner scrollbar-thin overflow-y-auto"
+            required
+          />
+          {/* Subtle glow effect on focus within group */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-primary/20 to-tertiary/20 rounded-3xl blur opacity-0 group-focus-within:opacity-100 transition duration-500 pointer-events-none -z-10"></div>
+        </div>
       </div>
 
       <button
         type="submit"
         disabled={isPending || !message.trim()}
-        className="btn btn-cta w-full cursor-pointer"
+        className="w-full flex justify-center items-center gap-2 px-6 py-4 bg-primary text-on-primary rounded-2xl font-headline font-black text-lg transition-transform hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:hover:scale-100 shadow-[0_0_20px_rgba(0,110,26,0.3)] hover:shadow-[0_0_30px_rgba(0,110,26,0.5)] cursor-pointer"
       >
         {isPending ? (
-          <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
         ) : (
           <>
-            <MessageCircle className="w-4 h-4" />
-            Start Conversation
+            <MessageCircle className="w-5 h-5 flex-shrink-0" />
+            <span>Send Inquiry</span>
           </>
         )}
       </button>

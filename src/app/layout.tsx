@@ -1,38 +1,36 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+import { getUser } from "@/actions/auth";
+import { getUnreadConversationCount } from "@/actions/conversations";
+import RouteLoader from "@/components/RouteLoader";
 
 export const metadata: Metadata = {
-  title: "NestScout — Find Your Perfect Rental",
+  title: "NestScout — Curated Editorial Real Estate",
   description:
-    "NestScout is a modern rental platform connecting landlords and tenants. Search properties by location, filter by preferences, and find your next home.",
-  keywords: ["rental", "property", "real estate", "apartment", "housing"],
+    "NestScout curates the world's most evocative living spaces. Moving beyond listings to discover homes that speak to your personality, values, and vision.",
+  keywords: ["rental", "property", "real estate", "curated", "editorial", "luxury"],
+  icons: {
+    icon: "/logo.png",
+    apple: "/logo.png",
+  },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const profile = await getUser();
+  const unreadCount = profile ? await getUnreadConversationCount() : 0;
+
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">
-        <Navbar />
-        <main className="flex-1 pt-16">{children}</main>
+    <html lang="en" className="h-full antialiased">
+      <body className="min-h-full flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container">
+        <RouteLoader />
+        <Navbar initialProfile={profile} unreadCount={unreadCount} />
+        <main className="flex-1 pt-[72px]">{children}</main>
       </body>
     </html>
   );

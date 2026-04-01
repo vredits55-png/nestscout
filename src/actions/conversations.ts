@@ -206,12 +206,22 @@ export async function getUnreadConversationCount() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 0;
 
-  // Count conversations with messages not from the current user that are newer than
-  // we'll simplify: just count conversations for now
+  // Count unread messages where someone ELSE sent the message to me
   const { count } = await supabase
-    .from("conversations")
+    .from("messages")
     .select("*", { count: "exact", head: true })
-    .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`);
+    .neq("sender_id", user.id)
+    .eq("is_read", false)
+    .in(
+      "conversation_id",
+      // subquery: conversations I'm part of
+      (await supabase
+        .from("conversations")
+        .select("id")
+        .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`)
+        .neq("deletion_status", "deleted")
+      ).data?.map((c: any) => c.id) || []
+    );
 
   return count ?? 0;
 }
@@ -250,8 +260,6 @@ export async function confirmConversationDeletion(conversationId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
-  // Update status to 'deleted' (We won't actually DROP the row to preserve history if needed, 
-  // but we will filter it out from the UI)
   const { error } = await supabase
     .from("conversations")
     .update({ 
@@ -266,3 +274,24 @@ export async function confirmConversationDeletion(conversationId: string) {
   revalidatePath('/conversations');
   return { success: true, redirect: true };
 }
+
+export async function markMessagesAsRead(conversationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  // Mark all messages in this conversation that were NOT sent by me as read
+  const { error } = await supabase
+    .from("messages")
+    .update({ is_read: true })
+    .eq("conversation_id", conversationId)
+    .neq("sender_id", user.id)
+    .eq("is_read", false);
+
+  if (error) return { error: error.message };
+
+  revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath('/conversations');
+  return { success: true };
+}
+

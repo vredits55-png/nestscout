@@ -77,7 +77,7 @@ export default function DeleteConversationButton({
         <p className="text-sm text-text-muted">
           The other party wants to delete this conversation. Do you agree? This action cannot be undone.
         </p>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
           <button
             onClick={handleConfirm}
             disabled={isPending}
@@ -97,7 +97,7 @@ export default function DeleteConversationButton({
     return (
       <div className="flex flex-col gap-2 p-3 bg-danger/5 border border-danger/20 rounded-xl">
         <p className="text-sm font-medium text-danger">Request Deletion?</p>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
           <button onClick={handleRequest} disabled={isPending} className="btn py-1.5 px-3 bg-danger text-white hover:bg-danger/90 border-transparent flex-1 text-xs">
             Confirm
           </button>

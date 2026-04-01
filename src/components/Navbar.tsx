@@ -18,33 +18,22 @@ import {
 } from "lucide-react";
 import type { Profile } from "@/lib/types";
 
-export default function Navbar() {
-  const [profile, setProfile] = useState<Profile | null>(null);
+import { usePathname } from "next/navigation";
+
+export default function Navbar({ initialProfile, unreadCount = 0 }: { initialProfile?: Profile | null, unreadCount?: number }) {
+  const [profile, setProfile] = useState<Profile | null>(initialProfile || null);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
+    setProfile(initialProfile || null);
+
     const supabase = createClient();
-    
-    async function fetchProfile(userId: string) {
-      const { data } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", userId)
-        .single();
-      if (data) setProfile(data);
-    }
-
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      if (user) fetchProfile(user.id);
-    });
-
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session?.user) {
-        fetchProfile(session.user.id);
-      } else {
+      if (!session?.user) {
         setProfile(null);
       }
     });
@@ -52,13 +41,15 @@ export default function Navbar() {
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [initialProfile]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+  if (pathname === "/login" || pathname === "/register") return null;
 
   return (
     <nav 
@@ -114,10 +105,16 @@ export default function Navbar() {
 
                 <Link
                   href="/conversations"
-                  className="text-sm font-medium text-[#475569] hover:text-[#0F172A] flex items-center gap-1.5 transition-colors"
+                  className="text-sm font-medium text-[#475569] hover:text-[#0F172A] flex items-center gap-1.5 transition-colors relative"
                 >
                   <MessageCircle className="w-4 h-4" />
                   Messages
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-1 -right-2 flex h-2 w-2">
+                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                       <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                    </span>
+                  )}
                 </Link>
 
                 <Link
@@ -198,7 +195,15 @@ export default function Navbar() {
                 className="flex items-center gap-2 text-[#475569] hover:text-[#0F172A] font-medium"
                 onClick={() => setMobileOpen(false)}
               >
-                <MessageCircle className="w-5 h-5" />
+                <div className="relative">
+                   <MessageCircle className="w-5 h-5" />
+                   {unreadCount > 0 && (
+                     <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                     </span>
+                   )}
+                </div>
                 Messages
               </Link>
 
