@@ -26,8 +26,8 @@ export default async function RootLayout({
   const unreadCount = profile ? await getUnreadConversationCount() : 0;
 
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container">
+    <html lang="en" className="min-h-screen antialiased">
+      <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container">
         <RouteLoader />
         <Navbar initialProfile={profile} unreadCount={unreadCount} />
         <main className="flex-1 pt-[72px]">{children}</main>
