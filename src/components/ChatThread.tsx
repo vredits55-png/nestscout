@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Send, Calendar, CheckCircle, XCircle, Check, CheckCheck } from "lucide-react";
 import { sendMessage, markMessagesAsRead } from "@/actions/conversations";
 import { createClient } from "@/lib/supabase/client";
-import type { Message, Profile } from "@/lib/types";
+import type { Message, Profile, Conversation } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 
 interface ChatThreadProps {
@@ -27,6 +28,7 @@ export default function ChatThread({
   const [newMessage, setNewMessage] = useState("");
   const [isPending, startTransition] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -61,6 +63,11 @@ export default function ChatThread({
 
           if (newMsg.conversation_id !== conversationId) return;
 
+          // Mark messages as read in the DB in real-time if from other user
+          if (newMsg.sender_id !== currentUserId) {
+            markMessagesAsRead(conversationId);
+          }
+
           setMessages((prev) => {
             // Prevent duplicate message renders if already added
             if (prev.some((m) => m.id === newMsg.id)) {
@@ -90,12 +97,27 @@ export default function ChatThread({
           });
         }
       )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "conversations",
+          filter: `id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const updatedConv = payload.new as Conversation;
+          if (updatedConv && updatedConv.deletion_status === "deleted") {
+            router.push("/conversations");
+          }
+        }
+      )
       .subscribe();
 
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, currentUserId, tenant, landlord]);
+  }, [conversationId, currentUserId, tenant, landlord, router]);
 
   function handleSend(e: React.FormEvent) {
     e.preventDefault();

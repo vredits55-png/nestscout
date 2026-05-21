@@ -24,12 +24,83 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
   const [prevInitialProfile, setPrevInitialProfile] = useState<Profile | null | undefined>(initialProfile);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [unread, setUnread] = useState(unreadCount);
   const pathname = usePathname();
 
   if (initialProfile !== prevInitialProfile) {
     setProfile(initialProfile || null);
     setPrevInitialProfile(initialProfile);
   }
+
+  useEffect(() => {
+    setUnread(unreadCount);
+  }, [unreadCount]);
+
+  useEffect(() => {
+    if (!profile) return;
+
+    const supabase = createClient();
+
+    const fetchUnreadCount = async () => {
+      // 1. Get user conversations
+      const { data: convs } = await supabase
+        .from("conversations")
+        .select("id")
+        .or(`tenant_id.eq.${profile.id},landlord_id.eq.${profile.id}`)
+        .neq("deletion_status", "deleted");
+
+      if (!convs || convs.length === 0) {
+        setUnread(0);
+        return;
+      }
+
+      const convIds = convs.map((c) => c.id);
+
+      // 2. Count unread messages
+      const { count } = await supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .neq("sender_id", profile.id)
+        .eq("is_read", false)
+        .in("conversation_id", convIds);
+
+      setUnread(count || 0);
+    };
+
+    // Run initially
+    fetchUnreadCount();
+
+    // Subscribe to messages changes
+    const messagesChannel = supabase
+      .channel("navbar-messages-realtime")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "messages",
+        },
+        () => {
+          fetchUnreadCount();
+        }
+      )
+      .on(
+        "postgres_changes",
+        {
+          event: "UPDATE",
+          schema: "public",
+          table: "conversations",
+        },
+        () => {
+          fetchUnreadCount();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(messagesChannel);
+    };
+  }, [profile]);
 
   useEffect(() => {
     const supabase = createClient();
@@ -112,7 +183,7 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
                 >
                   <MessageCircle className="w-4 h-4" />
                   Messages
-                  {unreadCount > 0 && (
+                  {unread > 0 && (
                     <span className="absolute -top-1 -right-2 flex h-2 w-2">
                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
@@ -200,12 +271,12 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
               >
                 <div className="relative">
                    <MessageCircle className="w-5 h-5" />
-                   {unreadCount > 0 && (
-                     <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
-                     </span>
-                   )}
+                    {unread > 0 && (
+                      <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                         <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                         <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                      </span>
+                    )}
                 </div>
                 Messages
               </Link>
