@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useTransition } from "react";
 import { Send, Calendar, CheckCircle, XCircle, Check, CheckCheck } from "lucide-react";
 import { sendMessage, markMessagesAsRead } from "@/actions/conversations";
-import type { Message } from "@/lib/types";
+import { createClient } from "@/lib/supabase/client";
+import type { Message, Profile } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 
 interface ChatThreadProps {
@@ -11,9 +12,17 @@ interface ChatThreadProps {
   currentUserId: string;
   initialMessages: Message[];
   isLandlord: boolean;
+  tenant?: Profile;
+  landlord?: Profile;
 }
 
-export default function ChatThread({ conversationId, currentUserId, initialMessages, isLandlord: _isLandlord }: ChatThreadProps) {
+export default function ChatThread({
+  conversationId,
+  currentUserId,
+  initialMessages,
+  tenant,
+  landlord,
+}: ChatThreadProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
   const [isPending, startTransition] = useTransition();
@@ -23,10 +32,70 @@ export default function ChatThread({ conversationId, currentUserId, initialMessa
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Sync state when initialMessages changes
+  useEffect(() => {
+    setMessages(initialMessages);
+  }, [initialMessages]);
+
   // Mark messages as read when conversation opens
   useEffect(() => {
     markMessagesAsRead(conversationId);
   }, [conversationId]);
+
+  // Set up Supabase Realtime Postgres Changes Subscription
+  useEffect(() => {
+    const supabase = createClient();
+
+    const channel = supabase
+      .channel(`chat-${conversationId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "messages",
+          filter: `conversation_id=eq.${conversationId}`,
+        },
+        (payload) => {
+          const newMsg = payload.new as Message;
+
+          if (newMsg.conversation_id !== conversationId) return;
+
+          setMessages((prev) => {
+            // Prevent duplicate message renders if already added
+            if (prev.some((m) => m.id === newMsg.id)) {
+              return prev;
+            }
+
+            // Resolve sender profile details
+            const senderProfile = newMsg.sender_id === tenant?.id ? tenant : landlord;
+            const msgWithSender: Message = {
+              ...newMsg,
+              sender: senderProfile,
+            };
+
+            // If it's a message sent by the current user, replace the optimistic message
+            if (newMsg.sender_id === currentUserId) {
+              const tempIndex = prev.findIndex(
+                (m) => m.id.startsWith("temp-") && m.content === newMsg.content
+              );
+              if (tempIndex !== -1) {
+                const updated = [...prev];
+                updated[tempIndex] = msgWithSender;
+                return updated;
+              }
+            }
+
+            return [...prev, msgWithSender];
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [conversationId, currentUserId, tenant, landlord]);
 
   function handleSend(e: React.FormEvent) {
     e.preventDefault();

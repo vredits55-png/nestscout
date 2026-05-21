@@ -2,12 +2,9 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Home, MapPin } from "lucide-react";
 import { getConversation, getMessages, getBookingRequests } from "@/actions/conversations";
-import type { BookingRequest } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import ChatThread from "@/components/ChatThread";
-import BookingRequestForm from "@/components/BookingRequestForm";
-import BookingCard from "@/components/BookingCard";
-import DeleteConversationButton from "@/components/DeleteConversationButton";
+import ConversationSidebar from "@/components/ConversationSidebar";
 import { formatCurrency } from "@/lib/utils";
 
 interface ConversationPageProps {
@@ -36,50 +33,18 @@ export default async function ConversationPage({ params }: ConversationPageProps
   const otherUser = isLandlord ? conversation.tenant : conversation.landlord;
 
   const sidebarContent = (
-    <div className="space-y-6">
-      {/* Booking Request Button (Tenant only) */}
-      {isTenant && conversation.status !== "confirmed" && (
-        <BookingRequestForm
-          conversationId={id}
-          propertyId={conversation.property_id}
-          pricePerMonth={conversation.property?.price_per_month || 0}
-        />
-      )}
-
-      {/* Booking Cards */}
-      {bookings.length > 0 && (
-        <div className="space-y-4">
-          <h3 className="text-xs font-bold text-outline uppercase tracking-widest">Booking Requests</h3>
-          {bookings.map((booking: BookingRequest) => (
-            <BookingCard
-              key={booking.id}
-              booking={booking}
-              conversationId={id}
-              isLandlord={isLandlord}
-            />
-          ))}
-        </div>
-      )}
-
-      {/* Confirmed Status */}
-      {conversation.status === "confirmed" && (
-        <div className="bg-primary/5 rounded-[2rem] p-6 text-center border border-primary/20 shadow-ambient">
-          <div className="text-4xl mb-4">🎉</div>
-          <h4 className="font-black font-headline text-primary text-xl">Booking Confirmed!</h4>
-          <p className="text-sm font-medium text-on-surface-variant mt-2">This property has been officially booked through the network.</p>
-        </div>
-      )}
-
-      {/* Deletion Workflow */}
-      <hr className="border-outline-variant/30 my-8" />
-      <DeleteConversationButton
-        conversationId={id}
-        _isLandlord={isLandlord}
-        currentUserId={user.id}
-        deletionStatus={conversation.deletion_status || 'none'}
-        deletionRequestedBy={conversation.deletion_requested_by}
-      />
-    </div>
+    <ConversationSidebar
+      conversationId={id}
+      propertyId={conversation.property_id}
+      pricePerMonth={conversation.property?.price_per_month || 0}
+      initialBookings={bookings}
+      initialStatus={conversation.status}
+      isTenant={isTenant}
+      isLandlord={isLandlord}
+      currentUserId={user.id}
+      initialDeletionStatus={conversation.deletion_status || "none"}
+      initialDeletionRequestedBy={conversation.deletion_requested_by || null}
+    />
   );
 
   return (
@@ -161,6 +126,8 @@ export default async function ConversationPage({ params }: ConversationPageProps
               currentUserId={user.id}
               initialMessages={messages}
               isLandlord={isLandlord}
+              tenant={conversation.tenant}
+              landlord={conversation.landlord}
             />
           </div>
         </div>

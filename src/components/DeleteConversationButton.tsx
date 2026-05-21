@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 
 interface DeleteConversationButtonProps {
   conversationId: string;
-  _isLandlord: boolean;
   currentUserId: string;
   deletionStatus: string;
   deletionRequestedBy: string | null;
@@ -15,7 +14,6 @@ interface DeleteConversationButtonProps {
 
 export default function DeleteConversationButton({
   conversationId,
-  _isLandlord,
   currentUserId,
   deletionStatus,
   deletionRequestedBy,
