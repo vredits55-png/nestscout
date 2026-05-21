@@ -13,7 +13,8 @@ CREATE POLICY "Conversation participants can update messages"
   ON public.messages FOR UPDATE USING (
     EXISTS (
       SELECT 1 FROM public.conversations c
-      WHERE c.id = messages.conversation_id
+      WHERE c.id = conversation_id
       AND (c.tenant_id = auth.uid() OR c.landlord_id = auth.uid())
     )
   );
+
