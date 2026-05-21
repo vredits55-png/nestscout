@@ -5,6 +5,7 @@ import Navbar from "@/components/Navbar";
 import { getUser } from "@/actions/auth";
 import { getUnreadConversationCount } from "@/actions/conversations";
 import RouteLoader from "@/components/RouteLoader";
+import MotionProvider from "@/components/MotionProvider";
 
 export const metadata: Metadata = {
   title: "NestScout — Curated Editorial Real Estate",
@@ -30,7 +31,9 @@ export default async function RootLayout({
       <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container">
         <RouteLoader />
         <Navbar initialProfile={profile} unreadCount={unreadCount} />
-        <main className="flex-1 pt-[72px]">{children}</main>
+        <main className="flex-1 pt-[72px]">
+          <MotionProvider>{children}</MotionProvider>
+        </main>
       </body>
     </html>
   );
