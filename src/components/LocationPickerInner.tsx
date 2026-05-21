@@ -92,6 +92,7 @@ export default function LocationPickerInner({
           zoom={13}
           className="w-full h-full z-0"
           zoomControl={true}
+          scrollWheelZoom={false}
         >
           <TileLayer
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
