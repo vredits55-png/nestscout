@@ -206,15 +206,32 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             {/* Location Map */}
             {property.latitude && property.longitude && (
               <div className="animate-fade-in-up delay-[400ms]">
-                <h2 className="text-2xl font-black font-headline text-on-surface mb-6 border-b border-outline-variant/30 pb-4">
-                  Cartography
-                </h2>
-                <div className="h-80 rounded-3xl overflow-hidden shadow-ambient relative">
-                  <MapView
-                    properties={[property]}
-                    center={[property.latitude, property.longitude]}
-                    zoom={15}
-                  />
+                <div className="flex items-center justify-between mb-6 border-b border-outline-variant/30 pb-4">
+                  <h2 className="text-2xl font-black font-headline text-on-surface mb-0">
+                    Cartography
+                  </h2>
+                  <a
+                    href={`https://www.google.com/maps/search/?api=1&query=${property.latitude},${property.longitude}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors"
+                  >
+                    Open in Google Maps
+                  </a>
+                </div>
+                <div className="h-80 rounded-3xl overflow-hidden shadow-ambient relative group">
+                  <div className="w-full h-full pointer-events-none">
+                    <MapView
+                      properties={[property]}
+                      center={[property.latitude, property.longitude]}
+                      zoom={15}
+                      interactive={false}
+                    />
+                  </div>
+                  {/* Subtle info indicator */}
+                  <div className="absolute bottom-4 left-4 z-[10] bg-surface/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-outline/20 text-xs font-semibold text-on-surface-variant pointer-events-none">
+                    Map is static to allow scrolling
+                  </div>
                 </div>
               </div>
             )}

@@ -27,6 +27,7 @@ interface MapViewProps {
     east: number;
     west: number;
   }) => void;
+  interactive?: boolean;
 }
 
 export default function MapView(props: MapViewProps) {

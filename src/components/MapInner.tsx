@@ -24,6 +24,7 @@ interface MapInnerProps {
     east: number;
     west: number;
   }) => void;
+  interactive?: boolean;
 }
 
 function createPinIcon(price: number) {
@@ -77,6 +78,7 @@ export default function MapInner({
   center = [40.7128, -74.006],
   zoom = 12,
   onBoundsChange,
+  interactive = true,
 }: MapInnerProps) {
   return (
     <MapContainer
@@ -91,6 +93,11 @@ export default function MapInner({
       className="w-full h-full rounded-2xl z-0 bg-[#AAD3DF]"
       zoomControl={false}
       scrollWheelZoom={false}
+      dragging={interactive}
+      doubleClickZoom={interactive}
+      touchZoom={interactive}
+      boxZoom={interactive}
+      keyboard={interactive}
     >
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -105,36 +112,38 @@ export default function MapInner({
           position={[property.latitude, property.longitude]}
           icon={createPinIcon(property.price_per_month)}
         >
-          <Popup>
-            <Link
-              href={`/properties/${property.id}`}
-              className="block cursor-pointer group"
-            >
-              <div className="min-w-[200px]">
-                {property.images?.[0] && (
-                  <div className="h-28 overflow-hidden rounded-t-lg">
-                    <img
-                      src={property.images[0]}
-                      alt={property.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+          {interactive && (
+            <Popup>
+              <Link
+                href={`/properties/${property.id}`}
+                className="block cursor-pointer group"
+              >
+                <div className="min-w-[200px]">
+                  {property.images?.[0] && (
+                    <div className="h-28 overflow-hidden rounded-t-lg">
+                      <img
+                        src={property.images[0]}
+                        alt={property.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <h4
+                      className="font-semibold text-sm mb-1 group-hover:text-[#0F766E] transition-colors"
+                      style={{ fontFamily: "var(--font-heading)" }}
+                    >
+                      {property.title}
+                    </h4>
+                    <p className="text-xs text-gray-500">{property.city}</p>
+                    <p className="text-sm font-bold mt-1" style={{ color: "#0F766E" }}>
+                      {formatCurrency(property.price_per_month)}/mo
+                    </p>
                   </div>
-                )}
-                <div className="p-3">
-                  <h4
-                    className="font-semibold text-sm mb-1 group-hover:text-[#0F766E] transition-colors"
-                    style={{ fontFamily: "var(--font-heading)" }}
-                  >
-                    {property.title}
-                  </h4>
-                  <p className="text-xs text-gray-500">{property.city}</p>
-                  <p className="text-sm font-bold mt-1" style={{ color: "#0F766E" }}>
-                    {formatCurrency(property.price_per_month)}/mo
-                  </p>
                 </div>
-              </div>
-            </Link>
-          </Popup>
+              </Link>
+            </Popup>
+          )}
         </Marker>
       ))}
     </MapContainer>
