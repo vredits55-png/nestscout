@@ -12,6 +12,7 @@ import {
   Eye,
   MapPin,
   Edit,
+  ArrowRight,
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import DeletePropertyButton from "./DeletePropertyButton";
@@ -71,6 +72,7 @@ export default async function ProviderDashboard() {
               value: inquiries.length,
               color: "bg-[#334155]",
               badge: unreadCount > 0 ? `${unreadCount} new` : undefined,
+              href: "/conversations",
             },
             {
               icon: TrendingUp,
@@ -78,31 +80,55 @@ export default async function ProviderDashboard() {
               value: properties.filter((p: Property) => p.is_available).length,
               color: "bg-[#0F172A]",
             },
-          ].map((stat) => (
-            <div key={stat.label} className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div
-                  className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}
-                >
-                  <stat.icon className="w-5 h-5 text-white" />
+          ].map((stat) => {
+            const CardContent = (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <div
+                    className={`w-12 h-12 rounded-lg ${stat.color} flex items-center justify-center`}
+                  >
+                    <stat.icon className="w-5 h-5 text-white" />
+                  </div>
+                  {stat.badge && (
+                    <span className="bg-[#FEF3C7] text-[#92400E] px-2.5 py-1 rounded-md text-xs font-semibold animate-pulse">
+                      {stat.badge}
+                    </span>
+                  )}
                 </div>
-                {stat.badge && (
-                  <span className="bg-[#FEF3C7] text-[#92400E] px-2.5 py-1 rounded-md text-xs font-semibold">
-                    {stat.badge}
-                  </span>
-                )}
-              </div>
+                <div
+                  className="text-4xl font-bold text-[#0F172A] mb-1 tracking-tight"
+                  style={{ fontFamily: "var(--font-heading)" }}
+                >
+                  {stat.value}
+                </div>
+                <div className="text-sm font-medium text-[#64748B] uppercase tracking-wide flex items-center gap-1 group-hover:text-[#0F172A] transition-colors">
+                  {stat.label}
+                  {stat.href && <ArrowRight className="w-4 h-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />}
+                </div>
+              </>
+            );
+
+            if (stat.href) {
+              return (
+                <Link
+                  key={stat.label}
+                  href={stat.href}
+                  className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm hover:shadow-md hover:border-slate-300 transition-all block cursor-pointer group"
+                >
+                  {CardContent}
+                </Link>
+              );
+            }
+
+            return (
               <div
-                className="text-4xl font-bold text-[#0F172A] mb-1 tracking-tight"
-                style={{ fontFamily: "var(--font-heading)" }}
+                key={stat.label}
+                className="bg-white border border-[#E2E8F0] rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow"
               >
-                {stat.value}
+                {CardContent}
               </div>
-              <div className="text-sm font-medium text-[#64748B] uppercase tracking-wide">
-                {stat.label}
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Properties List */}
@@ -218,12 +244,23 @@ export default async function ProviderDashboard() {
 
         {/* Recent Inquiries */}
         <div>
-          <h2
-            className="text-2xl font-bold text-[#0F172A] mb-6"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            Recent Inquiries
-          </h2>
+          <div className="flex items-center justify-between mb-6">
+            <h2
+              className="text-2xl font-bold text-[#0F172A]"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              Recent Inquiries
+            </h2>
+            {inquiries.length > 0 && (
+              <Link
+                href="/conversations"
+                className="text-sm font-semibold text-[#0F172A] hover:text-[#334155] flex items-center gap-1 transition-colors"
+              >
+                View All Messages
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            )}
+          </div>
 
           {inquiries.length > 0 ? (
             <div className="space-y-4 stagger-children">
