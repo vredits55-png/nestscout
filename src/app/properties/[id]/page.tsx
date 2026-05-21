@@ -205,20 +205,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
 
             {/* Location Map */}
             {property.latitude && property.longitude && (
-              <div className="animate-fade-in-up delay-[400ms]">
-                <div className="flex items-center justify-between mb-6 border-b border-outline-variant/30 pb-4">
-                  <h2 className="text-2xl font-black font-headline text-on-surface mb-0">
-                    Cartography
-                  </h2>
-                  <a
-                    href={`https://www.google.com/maps/search/?api=1&query=${property.latitude},${property.longitude}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-primary hover:text-primary/80 transition-colors"
-                  >
-                    Open in Google Maps
-                  </a>
-                </div>
+              <div className="animate-fade-in-up delay-[400ms] space-y-4">
                 <div className="h-80 rounded-3xl overflow-hidden shadow-ambient relative group">
                   <div className="w-full h-full pointer-events-none">
                     <MapView
@@ -229,10 +216,19 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                     />
                   </div>
                   {/* Subtle info indicator */}
-                  <div className="absolute bottom-4 left-4 z-[10] bg-surface/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-outline/20 text-xs font-semibold text-on-surface-variant pointer-events-none">
-                    Map is static to allow scrolling
+                  <div className="absolute bottom-4 left-4 z-[10] bg-surface/90 backdrop-blur-md px-4 py-2 rounded-2xl shadow-lg border border-outline/20 text-[10px] font-bold uppercase tracking-wider text-on-surface-variant pointer-events-none">
+                    Static Preview
                   </div>
                 </div>
+                <a
+                  href={`https://www.google.com/maps/search/?api=1&query=${property.latitude},${property.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full bg-[#0F766E] hover:bg-[#14B8A6] text-white text-xs font-bold font-headline uppercase tracking-widest py-5 px-8 rounded-3xl flex items-center justify-center gap-3 transition-all duration-300 shadow-[0_8px_30px_rgba(15,118,110,0.15)] hover:shadow-[0_12px_40px_rgba(15,118,110,0.3)] hover:-translate-y-0.5 active:translate-y-0"
+                >
+                  <MapPin className="w-4 h-4 text-white/90" />
+                  View Interactive Google Map
+                </a>
               </div>
             )}
           </div>
