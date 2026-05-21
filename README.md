@@ -27,7 +27,7 @@ A modern, premium real estate marketplace connecting verified landlords with pro
    ```bash
    npm run dev
    ```
-   Open [http://localhost:3000](http://localhost:3000) to view the application.
+   Open [http://localhost:3000](https://nestscout-house.vercel.app/) to view the application.
 
 ## Security
 - **Strict Configuration:** This repository does not commit `.env` variables.
