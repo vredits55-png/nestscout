@@ -6,7 +6,7 @@
 -- ============================================
 -- 1. Conversations Table
 -- ============================================
-create table public.conversations (
+create table if not exists public.conversations (
   id uuid default uuid_generate_v4() primary key,
   property_id uuid references public.properties(id) on delete cascade not null,
   tenant_id uuid references public.profiles(id) on delete cascade not null,
@@ -19,22 +19,26 @@ create table public.conversations (
 
 alter table public.conversations enable row level security;
 
+drop policy if exists "Tenants can view their conversations" on public.conversations;
 create policy "Tenants can view their conversations"
   on public.conversations for select using (auth.uid() = tenant_id);
 
+drop policy if exists "Landlords can view their conversations" on public.conversations;
 create policy "Landlords can view their conversations"
   on public.conversations for select using (auth.uid() = landlord_id);
 
+drop policy if exists "Tenants can create conversations" on public.conversations;
 create policy "Tenants can create conversations"
   on public.conversations for insert with check (auth.uid() = tenant_id);
 
+drop policy if exists "Participants can update conversations" on public.conversations;
 create policy "Participants can update conversations"
   on public.conversations for update using (auth.uid() = tenant_id or auth.uid() = landlord_id);
 
 -- ============================================
 -- 2. Messages Table
 -- ============================================
-create table public.messages (
+create table if not exists public.messages (
   id uuid default uuid_generate_v4() primary key,
   conversation_id uuid references public.conversations(id) on delete cascade not null,
   sender_id uuid references public.profiles(id) on delete cascade not null,
@@ -45,6 +49,7 @@ create table public.messages (
 
 alter table public.messages enable row level security;
 
+drop policy if exists "Conversation participants can view messages" on public.messages;
 create policy "Conversation participants can view messages"
   on public.messages for select using (
     exists (
@@ -54,6 +59,7 @@ create policy "Conversation participants can view messages"
     )
   );
 
+drop policy if exists "Conversation participants can send messages" on public.messages;
 create policy "Conversation participants can send messages"
   on public.messages for insert with check (
     auth.uid() = sender_id
@@ -67,7 +73,7 @@ create policy "Conversation participants can send messages"
 -- ============================================
 -- 3. Booking Requests Table
 -- ============================================
-create table public.booking_requests (
+create table if not exists public.booking_requests (
   id uuid default uuid_generate_v4() primary key,
   conversation_id uuid references public.conversations(id) on delete cascade not null,
   property_id uuid references public.properties(id) on delete cascade not null,
@@ -83,9 +89,11 @@ create table public.booking_requests (
 
 alter table public.booking_requests enable row level security;
 
+drop policy if exists "Tenants can view their booking requests" on public.booking_requests;
 create policy "Tenants can view their booking requests"
   on public.booking_requests for select using (auth.uid() = tenant_id);
 
+drop policy if exists "Landlords can view booking requests for their conversations" on public.booking_requests;
 create policy "Landlords can view booking requests for their conversations"
   on public.booking_requests for select using (
     exists (
@@ -94,9 +102,11 @@ create policy "Landlords can view booking requests for their conversations"
     )
   );
 
+drop policy if exists "Tenants can create booking requests" on public.booking_requests;
 create policy "Tenants can create booking requests"
   on public.booking_requests for insert with check (auth.uid() = tenant_id);
 
+drop policy if exists "Landlords can update booking requests" on public.booking_requests;
 create policy "Landlords can update booking requests"
   on public.booking_requests for update using (
     exists (
@@ -105,15 +115,16 @@ create policy "Landlords can update booking requests"
     )
   );
 
+drop policy if exists "Tenants can update their own booking requests" on public.booking_requests;
 create policy "Tenants can update their own booking requests"
   on public.booking_requests for update using (auth.uid() = tenant_id);
 
 -- ============================================
 -- 4. Indexes
 -- ============================================
-create index idx_conversations_tenant on public.conversations(tenant_id);
-create index idx_conversations_landlord on public.conversations(landlord_id);
-create index idx_conversations_property on public.conversations(property_id);
-create index idx_messages_conversation on public.messages(conversation_id);
-create index idx_messages_created on public.messages(created_at);
-create index idx_booking_requests_conversation on public.booking_requests(conversation_id);
+create index if not exists idx_conversations_tenant on public.conversations(tenant_id);
+create index if not exists idx_conversations_landlord on public.conversations(landlord_id);
+create index if not exists idx_conversations_property on public.conversations(property_id);
+create index if not exists idx_messages_conversation on public.messages(conversation_id);
+create index if not exists idx_messages_created on public.messages(created_at);
+create index if not exists idx_booking_requests_conversation on public.booking_requests(conversation_id);

@@ -9,7 +9,7 @@ create extension if not exists "uuid-ossp";
 -- ============================================
 -- 1. Profiles Table (extends auth.users)
 -- ============================================
-create table public.profiles (
+create table if not exists public.profiles (
   id uuid references auth.users on delete cascade primary key,
   email text not null,
   full_name text not null default '',
@@ -21,19 +21,22 @@ create table public.profiles (
 
 alter table public.profiles enable row level security;
 
+drop policy if exists "Public profiles are viewable by everyone" on public.profiles;
 create policy "Public profiles are viewable by everyone"
   on public.profiles for select using (true);
 
+drop policy if exists "Users can update their own profile" on public.profiles;
 create policy "Users can update their own profile"
   on public.profiles for update using (auth.uid() = id);
 
+drop policy if exists "Users can insert their own profile" on public.profiles;
 create policy "Users can insert their own profile"
   on public.profiles for insert with check (auth.uid() = id);
 
 -- ============================================
 -- 2. Properties Table
 -- ============================================
-create table public.properties (
+create table if not exists public.properties (
   id uuid default uuid_generate_v4() primary key,
   provider_id uuid references public.profiles(id) on delete cascade not null,
   title text not null,
@@ -59,22 +62,26 @@ create table public.properties (
 
 alter table public.properties enable row level security;
 
+drop policy if exists "Properties are viewable by everyone" on public.properties;
 create policy "Properties are viewable by everyone"
   on public.properties for select using (true);
 
+drop policy if exists "Providers can insert properties" on public.properties;
 create policy "Providers can insert properties"
   on public.properties for insert with check (auth.uid() = provider_id);
 
+drop policy if exists "Providers can update their own properties" on public.properties;
 create policy "Providers can update their own properties"
   on public.properties for update using (auth.uid() = provider_id);
 
+drop policy if exists "Providers can delete their own properties" on public.properties;
 create policy "Providers can delete their own properties"
   on public.properties for delete using (auth.uid() = provider_id);
 
 -- ============================================
 -- 3. Favorites Table
 -- ============================================
-create table public.favorites (
+create table if not exists public.favorites (
   id uuid default uuid_generate_v4() primary key,
   user_id uuid references public.profiles(id) on delete cascade not null,
   property_id uuid references public.properties(id) on delete cascade not null,
@@ -84,19 +91,22 @@ create table public.favorites (
 
 alter table public.favorites enable row level security;
 
+drop policy if exists "Users can view their own favorites" on public.favorites;
 create policy "Users can view their own favorites"
   on public.favorites for select using (auth.uid() = user_id);
 
+drop policy if exists "Users can add favorites" on public.favorites;
 create policy "Users can add favorites"
   on public.favorites for insert with check (auth.uid() = user_id);
 
+drop policy if exists "Users can remove their favorites" on public.favorites;
 create policy "Users can remove their favorites"
   on public.favorites for delete using (auth.uid() = user_id);
 
 -- ============================================
 -- 4. Inquiries Table
 -- ============================================
-create table public.inquiries (
+create table if not exists public.inquiries (
   id uuid default uuid_generate_v4() primary key,
   property_id uuid references public.properties(id) on delete cascade not null,
   sender_id uuid references public.profiles(id) on delete cascade not null,
@@ -108,29 +118,38 @@ create table public.inquiries (
 
 alter table public.inquiries enable row level security;
 
+drop policy if exists "Senders can view their sent inquiries" on public.inquiries;
 create policy "Senders can view their sent inquiries"
   on public.inquiries for select using (auth.uid() = sender_id);
 
+drop policy if exists "Receivers can view their received inquiries" on public.inquiries;
 create policy "Receivers can view their received inquiries"
   on public.inquiries for select using (auth.uid() = receiver_id);
 
+drop policy if exists "Authenticated users can send inquiries" on public.inquiries;
 create policy "Authenticated users can send inquiries"
   on public.inquiries for insert with check (auth.uid() = sender_id);
 
+drop policy if exists "Receivers can update inquiry read status" on public.inquiries;
 create policy "Receivers can update inquiry read status"
   on public.inquiries for update using (auth.uid() = receiver_id);
 
 -- ============================================
 -- 5. Storage Bucket for property images
 -- ============================================
-insert into storage.buckets (id, name, public) values ('property-images', 'property-images', true);
+insert into storage.buckets (id, name, public) 
+values ('property-images', 'property-images', true)
+on conflict (id) do nothing;
 
+drop policy if exists "Anyone can view property images" on storage.objects;
 create policy "Anyone can view property images"
   on storage.objects for select using (bucket_id = 'property-images');
 
+drop policy if exists "Authenticated users can upload property images" on storage.objects;
 create policy "Authenticated users can upload property images"
   on storage.objects for insert with check (bucket_id = 'property-images' and auth.role() = 'authenticated');
 
+drop policy if exists "Users can delete their own images" on storage.objects;
 create policy "Users can delete their own images"
   on storage.objects for delete using (bucket_id = 'property-images' and auth.uid()::text = (storage.foldername(name))[1]);
 
@@ -146,11 +165,13 @@ begin
     new.email,
     coalesce(new.raw_user_meta_data->>'full_name', ''),
     coalesce(new.raw_user_meta_data->>'role', 'client')
-  );
+  )
+  on conflict (id) do nothing;
   return new;
 end;
 $$ language plpgsql security definer;
 
+drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
   after insert on auth.users
   for each row execute procedure public.handle_new_user();
@@ -158,11 +179,11 @@ create trigger on_auth_user_created
 -- ============================================
 -- 7. Indexes for performance
 -- ============================================
-create index idx_properties_provider on public.properties(provider_id);
-create index idx_properties_city on public.properties(city);
-create index idx_properties_price on public.properties(price_per_month);
-create index idx_properties_available on public.properties(is_available);
-create index idx_properties_location on public.properties(latitude, longitude);
-create index idx_favorites_user on public.favorites(user_id);
-create index idx_inquiries_receiver on public.inquiries(receiver_id);
-create index idx_inquiries_sender on public.inquiries(sender_id);
+create index if not exists idx_properties_provider on public.properties(provider_id);
+create index if not exists idx_properties_city on public.properties(city);
+create index if not exists idx_properties_price on public.properties(price_per_month);
+create index if not exists idx_properties_available on public.properties(is_available);
+create index if not exists idx_properties_location on public.properties(latitude, longitude);
+create index if not exists idx_favorites_user on public.favorites(user_id);
+create index if not exists idx_inquiries_receiver on public.inquiries(receiver_id);
+create index if not exists idx_inquiries_sender on public.inquiries(sender_id);
