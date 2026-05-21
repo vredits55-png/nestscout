@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Home, MapPin } from "lucide-react";
 import { getConversation, getMessages, getBookingRequests } from "@/actions/conversations";
+import type { BookingRequest } from "@/lib/types";
 import { createClient } from "@/lib/supabase/server";
 import ChatThread from "@/components/ChatThread";
 import BookingRequestForm from "@/components/BookingRequestForm";
@@ -45,7 +46,7 @@ export default async function ConversationPage({ params }: ConversationPageProps
       {bookings.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-xs font-bold text-outline uppercase tracking-widest">Booking Requests</h3>
-          {bookings.map((booking: any) => (
+          {bookings.map((booking: BookingRequest) => (
             <BookingCard
               key={booking.id}
               booking={booking}

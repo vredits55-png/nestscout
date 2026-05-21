@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 
 export default function DynamicBackButton({
-  fallback = "/search",
+  fallback: _fallback = "/search",
   label = "Return",
 }: {
   fallback?: string;

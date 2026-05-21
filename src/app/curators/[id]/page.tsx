@@ -1,9 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import PropertyCard from "@/components/PropertyCard";
 import DynamicBackButton from "@/components/DynamicBackButton";
-import { ArrowLeft, MapPin, Building, Star, Award, CheckCircle } from "lucide-react";
+import { MapPin, Building, Star, Award, CheckCircle } from "lucide-react";
 
 interface CuratorPageProps {
   params: Promise<{ id: string }>;
@@ -40,7 +39,7 @@ export default async function CuratorPortfolioPage({ params }: CuratorPageProps)
   }
 
   // 2. Fetch Curator Properties
-  const { data: properties, error: propsError } = await supabase
+  const { data: properties } = await supabase
     .from("properties")
     .select("*")
     .eq("provider_id", id)

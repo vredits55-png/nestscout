@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
+import { Trash2, AlertTriangle } from "lucide-react";
 import { requestConversationDeletion, confirmConversationDeletion } from "@/actions/conversations";
 import { useRouter } from "next/navigation";
 

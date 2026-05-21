@@ -200,7 +200,7 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
               </label>
               <select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as any)}
+                onChange={(e) => setSortBy(e.target.value as "newest" | "price_asc" | "price_desc")}
                 className="input-field cursor-pointer font-bold"
               >
                 <option value="newest">Featured Newest</option>

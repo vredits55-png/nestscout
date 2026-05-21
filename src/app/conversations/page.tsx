@@ -3,6 +3,7 @@ import { MessageCircle, ArrowRight, Clock, CheckCircle, XCircle, Home } from "lu
 import { getConversations } from "@/actions/conversations";
 import { createClient } from "@/lib/supabase/server";
 import { formatDistanceToNow } from "date-fns";
+import type { Conversation } from "@/lib/types";
 
 export default async function ConversationsPage() {
   const supabase = await createClient();
@@ -39,7 +40,7 @@ export default async function ConversationsPage() {
           </div>
         ) : (
           <div className="space-y-3 stagger-children">
-            {conversations.map((conv: any) => {
+            {conversations.map((conv: Conversation) => {
               const otherUser = user?.id === conv.tenant_id ? conv.landlord : conv.tenant;
               const config = statusConfig[conv.status] || statusConfig.active;
               const StatusIcon = config.icon;

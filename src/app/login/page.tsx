@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "@/actions/auth";
-import { LogIn, ArrowLeft, Home } from "lucide-react";
+import { LogIn, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const [error, setError] = useState("");

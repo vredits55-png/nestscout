@@ -12,7 +12,6 @@ import {
   LayoutDashboard,
   Menu,
   X,
-  UserPlus,
   MessageCircle,
   User,
 } from "lucide-react";
@@ -22,13 +21,17 @@ import { usePathname } from "next/navigation";
 
 export default function Navbar({ initialProfile, unreadCount = 0 }: { initialProfile?: Profile | null, unreadCount?: number }) {
   const [profile, setProfile] = useState<Profile | null>(initialProfile || null);
+  const [prevInitialProfile, setPrevInitialProfile] = useState<Profile | null | undefined>(initialProfile);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = usePathname();
 
-  useEffect(() => {
+  if (initialProfile !== prevInitialProfile) {
     setProfile(initialProfile || null);
+    setPrevInitialProfile(initialProfile);
+  }
 
+  useEffect(() => {
     const supabase = createClient();
     const {
       data: { subscription },
@@ -41,7 +44,7 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
     return () => {
       subscription.unsubscribe();
     };
-  }, [initialProfile]);
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);

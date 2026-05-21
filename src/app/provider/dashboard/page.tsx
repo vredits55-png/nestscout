@@ -2,6 +2,7 @@ import { getProviderProperties } from "@/actions/properties";
 import { getReceivedInquiries } from "@/actions/inquiries";
 import { getUser } from "@/actions/auth";
 import { redirect } from "next/navigation";
+import type { Property, Inquiry } from "@/lib/types";
 import Link from "next/link";
 import {
   Plus,
@@ -24,7 +25,7 @@ export default async function ProviderDashboard() {
     getReceivedInquiries(),
   ]);
 
-  const unreadCount = inquiries.filter((i: any) => !i.is_read).length;
+  const unreadCount = inquiries.filter((i: Inquiry) => !i.is_read).length;
 
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
@@ -74,7 +75,7 @@ export default async function ProviderDashboard() {
             {
               icon: TrendingUp,
               label: "Available",
-              value: properties.filter((p: any) => p.is_available).length,
+              value: properties.filter((p: Property) => p.is_available).length,
               color: "bg-[#0F172A]",
             },
           ].map((stat) => (
@@ -117,7 +118,7 @@ export default async function ProviderDashboard() {
 
           {properties.length > 0 ? (
             <div className="space-y-4 stagger-children">
-              {properties.map((property: any) => (
+              {properties.map((property: Property) => (
                 <div
                   key={property.id}
                   className="bg-white border border-[#E2E8F0] rounded-xl p-5 flex flex-col sm:flex-row sm:items-center gap-5 transition-all duration-300 hover:shadow-md group"
@@ -226,7 +227,7 @@ export default async function ProviderDashboard() {
 
           {inquiries.length > 0 ? (
             <div className="space-y-4 stagger-children">
-              {inquiries.slice(0, 10).map((inquiry: any) => (
+              {inquiries.slice(0, 10).map((inquiry: Inquiry) => (
                 <div
                   key={inquiry.id}
                   className={`bg-white border border-[#E2E8F0] rounded-xl p-5 transition-shadow hover:shadow-md ${

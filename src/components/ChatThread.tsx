@@ -13,7 +13,7 @@ interface ChatThreadProps {
   isLandlord: boolean;
 }
 
-export default function ChatThread({ conversationId, currentUserId, initialMessages, isLandlord }: ChatThreadProps) {
+export default function ChatThread({ conversationId, currentUserId, initialMessages, isLandlord: _isLandlord }: ChatThreadProps) {
   const [messages, setMessages] = useState<Message[]>(initialMessages);
   const [newMessage, setNewMessage] = useState("");
   const [isPending, startTransition] = useTransition();

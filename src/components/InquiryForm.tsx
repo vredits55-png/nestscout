@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Send, CheckCircle, MessageCircle } from "lucide-react";
+import { CheckCircle, MessageCircle } from "lucide-react";
 import { getOrCreateConversation, sendMessage } from "@/actions/conversations";
 
 interface InquiryFormProps {

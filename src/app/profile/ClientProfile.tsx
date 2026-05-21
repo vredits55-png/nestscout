@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { User, Mail, Phone, Shield, CheckCircle, MapPin, Star, Bell, History } from "lucide-react";
+import { User, Mail, Phone, Shield, CheckCircle, MapPin, Bell, History } from "lucide-react";
 import { updateProfile } from "@/actions/profile";
 import type { Profile } from "@/lib/types";
 import Link from "next/link";

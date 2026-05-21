@@ -113,7 +113,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-lg leading-relaxed text-on-surface-variant italic font-body">
-                    "NestScout didn't just show me houses. They understood my need for natural light and creative energy. The curator I worked with found a loft that has completely transformed my workflow."
+                    &ldquo;NestScout didn&apos;t just show me houses. They understood my need for natural light and creative energy. The curator I worked with found a loft that has completely transformed my workflow.&rdquo;
                 </p>
                 <div>
                   <p className="font-bold text-on-surface font-headline">Sarah Jenkins</p>
@@ -138,7 +138,7 @@ export default function HomePage() {
                   ))}
                 </div>
                 <p className="text-lg leading-relaxed text-on-surface-variant italic font-body">
-                    "The editorial approach to real estate is refreshing. Every property recommended felt hand-picked for my specific lifestyle. It's the highest level of service I've experienced."
+                    &ldquo;The editorial approach to real estate is refreshing. Every property recommended felt hand-picked for my specific lifestyle. It&apos;s the highest level of service I&apos;ve experienced.&rdquo;
                 </p>
                 <div>
                   <p className="font-bold text-on-surface font-headline">Marcus Thorne</p>
@@ -192,7 +192,7 @@ export default function HomePage() {
               NestScout
             </div>
             <p className="text-white/60 leading-relaxed font-body">
-                Curating the world's most evocative living spaces for the modern individual. A new standard in residential discovery.
+                Curating the world&apos;s most evocative living spaces for the modern individual. A new standard in residential discovery.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-16 md:gap-24 w-full md:w-auto">

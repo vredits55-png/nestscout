@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/actions/auth";
-import { UserPlus, ArrowLeft, User, Building, Hexagon } from "lucide-react";
+import { UserPlus, ArrowLeft, User, Building } from "lucide-react";
 
 function RegisterContent() {
   const searchParams = useSearchParams();

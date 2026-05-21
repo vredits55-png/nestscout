@@ -5,8 +5,6 @@ import {
   Bed,
   Bath,
   Maximize,
-  ArrowLeft,
-  Tag,
   CheckCircle,
   Info,
   ChevronRight,
@@ -195,7 +193,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 <div className="relative overflow-hidden group">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-bl-[100px] border-l border-b border-primary/20 blur-xl"></div>
                   <p className="text-on-surface-variant text-xl font-light leading-relaxed whitespace-pre-wrap relative z-10 italic">
-                    "{property.neighborhood_info}"
+                    &ldquo;{property.neighborhood_info}&rdquo;
                   </p>
                 </div>
               </section>

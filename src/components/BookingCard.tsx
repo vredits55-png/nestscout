@@ -78,7 +78,7 @@ export default function BookingCard({ booking, conversationId, isLandlord, onRes
 
       {booking.note && (
         <div className="mb-6 p-4 bg-surface-container-lowest rounded-xl italic text-on-surface-variant font-body">
-          "{booking.note}"
+          &ldquo;{booking.note}&rdquo;
         </div>
       )}
 

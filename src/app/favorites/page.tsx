@@ -2,6 +2,7 @@ import { getFavorites } from "@/actions/favorites";
 import PropertyCard from "@/components/PropertyCard";
 import { Heart, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import type { Favorite, Property } from "@/lib/types";
 
 export default async function FavoritesPage() {
   const favorites = await getFavorites();
@@ -26,7 +27,7 @@ export default async function FavoritesPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
         {favorites.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 stagger-children">
-            {favorites.map((fav: { id: string; property: any }, i: number) => (
+            {favorites.map((fav: Favorite & { property: Property }, i: number) => (
               <PropertyCard
                 key={fav.id}
                 property={fav.property}

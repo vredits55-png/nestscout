@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 export default function RouteLoader() {
@@ -8,9 +8,14 @@ export default function RouteLoader() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    setLoading(true);
+    const handle = setTimeout(() => {
+      setLoading(true);
+    }, 0);
     const timeout = setTimeout(() => setLoading(false), 600);
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(handle);
+      clearTimeout(timeout);
+    };
   }, [pathname]);
 
   if (!loading) return null;

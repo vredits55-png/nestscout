@@ -220,7 +220,7 @@ export async function getUnreadConversationCount() {
         .select("id")
         .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`)
         .neq("deletion_status", "deleted")
-      ).data?.map((c: any) => c.id) || []
+      ).data?.map((c: { id: string }) => c.id) || []
     );
 
   return count ?? 0;
