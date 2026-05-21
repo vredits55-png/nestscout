@@ -99,11 +99,16 @@
   color: #002203;
 }
 
+html {
+  overflow-x: hidden;
+  height: auto;
+}
+
 body {
   font-family: var(--font-body);
   color: var(--color-on-surface);
   background: var(--color-surface);
-  overflow-x: hidden;
+  overflow: visible;
   line-height: 1.6;
 }
 

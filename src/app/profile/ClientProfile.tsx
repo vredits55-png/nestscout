@@ -36,7 +36,7 @@ export default function ProfilePage({ initialProfile, userEmail }: { initialProf
   }
 
   return (
-    <div className="min-h-screen bg-background relative overflow-x-hidden pb-32">
+    <div className="min-h-screen bg-background relative pb-32">
       {/* Animated Floating Background Elements (Antigravity effects) */}
       <div className="floating-blob w-96 h-96 bg-primary-fixed top-[-5%] left-[-10%] rounded-full animate-float"></div>
       <div className="floating-blob w-80 h-80 bg-tertiary-fixed-dim top-[40%] right-[-5%] rounded-full animate-float-delayed"></div>
