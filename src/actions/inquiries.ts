@@ -32,13 +32,47 @@ export async function getReceivedInquiries() {
 
   if (!user) return [];
 
-  const { data } = await supabase
-    .from("inquiries")
-    .select("*, sender:profiles!sender_id(*), property:properties(*)")
-    .eq("receiver_id", user.id)
-    .order("created_at", { ascending: false });
+  const { data: convs } = await supabase
+    .from("conversations")
+    .select("*, property:properties(*), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
+    .eq("landlord_id", user.id)
+    .neq("deletion_status", "deleted")
+    .order("updated_at", { ascending: false });
 
-  return data ?? [];
+  if (!convs) return [];
+
+  const inquiries = [];
+  for (const conv of convs) {
+    const { data: msgs } = await supabase
+      .from("messages")
+      .select("*")
+      .eq("conversation_id", conv.id)
+      .order("created_at", { ascending: false })
+      .limit(1);
+
+    const latestMsg = msgs?.[0];
+
+    const { count: unreadCount } = await supabase
+      .from("messages")
+      .select("*", { count: "exact", head: true })
+      .eq("conversation_id", conv.id)
+      .neq("sender_id", user.id)
+      .eq("is_read", false);
+
+    inquiries.push({
+      id: conv.id,
+      property_id: conv.property_id,
+      sender_id: conv.tenant_id,
+      receiver_id: conv.landlord_id,
+      message: latestMsg?.content || "No messages yet",
+      is_read: (unreadCount ?? 0) === 0,
+      created_at: latestMsg?.created_at || conv.updated_at,
+      sender: conv.tenant,
+      property: conv.property,
+    });
+  }
+
+  return inquiries;
 }
 
 export async function markInquiryRead(id: string) {
@@ -55,10 +89,21 @@ export async function getUnreadCount() {
 
   if (!user) return 0;
 
+  const { data: convs } = await supabase
+    .from("conversations")
+    .select("id")
+    .eq("landlord_id", user.id)
+    .neq("deletion_status", "deleted");
+
+  if (!convs || convs.length === 0) return 0;
+
+  const convIds = convs.map((c) => c.id);
+
   const { count } = await supabase
-    .from("inquiries")
+    .from("messages")
     .select("*", { count: "exact", head: true })
-    .eq("receiver_id", user.id)
+    .in("conversation_id", convIds)
+    .neq("sender_id", user.id)
     .eq("is_read", false);
 
   return count ?? 0;

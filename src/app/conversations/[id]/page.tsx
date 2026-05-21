@@ -70,7 +70,7 @@ export default async function ConversationPage({ params }: ConversationPageProps
       <hr className="border-outline-variant/30 my-8" />
       <DeleteConversationButton
         conversationId={id}
-        isLandlord={isLandlord}
+        _isLandlord={isLandlord}
         currentUserId={user.id}
         deletionStatus={conversation.deletion_status || 'none'}
         deletionRequestedBy={conversation.deletion_requested_by}

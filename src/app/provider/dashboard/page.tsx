@@ -228,36 +228,41 @@ export default async function ProviderDashboard() {
           {inquiries.length > 0 ? (
             <div className="space-y-4 stagger-children">
               {inquiries.slice(0, 10).map((inquiry: Inquiry) => (
-                <div
+                <Link
                   key={inquiry.id}
-                  className={`bg-white border border-[#E2E8F0] rounded-xl p-5 transition-shadow hover:shadow-md ${
-                    !inquiry.is_read
-                      ? "border-l-4 border-l-[#0F172A]"
-                      : ""
-                  }`}
+                  href={`/conversations/${inquiry.id}`}
+                  className="block"
                 >
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex items-start gap-4 min-w-0">
-                      <div className="w-12 h-12 rounded-full bg-[#F1F5F9] flex items-center justify-center shrink-0">
-                        <MessageSquare className="w-5 h-5 text-[#475569]" />
-                      </div>
-                      <div className="min-w-0 pt-1">
-                        <div className="font-bold text-[#0F172A] text-sm mb-0.5">
-                          {inquiry.sender?.full_name || "Unknown User"}
+                  <div
+                    className={`bg-white border border-[#E2E8F0] rounded-xl p-5 transition-shadow hover:shadow-md ${
+                      !inquiry.is_read
+                        ? "border-l-4 border-l-[#0F172A]"
+                        : ""
+                    }`}
+                  >
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-4 min-w-0">
+                        <div className="w-12 h-12 rounded-full bg-[#F1F5F9] flex items-center justify-center shrink-0">
+                          <MessageSquare className="w-5 h-5 text-[#475569]" />
                         </div>
-                        <div className="text-xs font-semibold text-[#64748B] mb-2 uppercase tracking-wide">
-                          Re: {inquiry.property?.title || "Unknown Property"}
+                        <div className="min-w-0 pt-1">
+                          <div className="font-bold text-[#0F172A] text-sm mb-0.5">
+                            {inquiry.sender?.full_name || "Unknown User"}
+                          </div>
+                          <div className="text-xs font-semibold text-[#64748B] mb-2 uppercase tracking-wide">
+                            Re: {inquiry.property?.title || "Unknown Property"}
+                          </div>
+                          <p className="text-sm text-[#475569] leading-relaxed">
+                            {inquiry.message}
+                          </p>
                         </div>
-                        <p className="text-sm text-[#475569] leading-relaxed">
-                          {inquiry.message}
-                        </p>
                       </div>
-                    </div>
-                    <div className="text-xs font-medium text-[#94A3B8] whitespace-nowrap shrink-0 pt-1">
-                      {formatDate(inquiry.created_at)}
+                      <div className="text-xs font-medium text-[#94A3B8] whitespace-nowrap shrink-0 pt-1">
+                        {formatDate(inquiry.created_at)}
+                      </div>
                     </div>
                   </div>
-                </div>
+                </Link>
               ))}
             </div>
           ) : (

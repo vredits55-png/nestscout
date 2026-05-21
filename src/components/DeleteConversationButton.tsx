@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";
 
 interface DeleteConversationButtonProps {
   conversationId: string;
-  isLandlord: boolean;
+  _isLandlord: boolean;
   currentUserId: string;
   deletionStatus: string;
   deletionRequestedBy: string | null;
@@ -15,7 +15,7 @@ interface DeleteConversationButtonProps {
 
 export default function DeleteConversationButton({
   conversationId,
-  isLandlord,
+  _isLandlord,
   currentUserId,
   deletionStatus,
   deletionRequestedBy,
@@ -42,9 +42,25 @@ export default function DeleteConversationButton({
     });
   };
 
-  // State 1: No deletion requested. Landlord can initiate.
+  // If Modal
+  if (showConfirm && deletionStatus === "none") {
+    return (
+      <div className="flex flex-col gap-2 p-3 bg-danger/5 border border-danger/20 rounded-xl">
+        <p className="text-sm font-medium text-danger">Request Deletion?</p>
+        <div className="flex flex-col sm:flex-row gap-2 mt-2">
+          <button onClick={handleRequest} disabled={isPending} className="btn py-1.5 px-3 bg-danger text-white hover:bg-danger/90 border-transparent flex-1 text-xs">
+            Confirm
+          </button>
+          <button onClick={() => setShowConfirm(false)} disabled={isPending} className="btn btn-outline py-1.5 px-3 flex-1 text-xs">
+            Cancel
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // State 1: No deletion requested. Anyone can initiate.
   if (deletionStatus === "none") {
-    if (!isLandlord) return null; // Only landlord can initiate
     return (
       <button
         onClick={() => setShowConfirm(true)}
@@ -84,25 +100,6 @@ export default function DeleteConversationButton({
             className="btn btn-primary flex-1 bg-danger hover:bg-danger/90 border-transparent text-white"
           >
             {isPending ? "Deleting..." : "Yes, Delete"}
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // If Modal
-  if (showConfirm && deletionStatus === "none") {
-    // We handle the initiation explicitly inside the button in state 1, 
-    // but we can render a mini confirmation popover if preferred.
-    return (
-      <div className="flex flex-col gap-2 p-3 bg-danger/5 border border-danger/20 rounded-xl">
-        <p className="text-sm font-medium text-danger">Request Deletion?</p>
-        <div className="flex flex-col sm:flex-row gap-2 mt-2">
-          <button onClick={handleRequest} disabled={isPending} className="btn py-1.5 px-3 bg-danger text-white hover:bg-danger/90 border-transparent flex-1 text-xs">
-            Confirm
-          </button>
-          <button onClick={() => setShowConfirm(false)} disabled={isPending} className="btn btn-outline py-1.5 px-3 flex-1 text-xs">
-            Cancel
           </button>
         </div>
       </div>
