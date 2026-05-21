@@ -21,7 +21,7 @@ jobs:
 
       - name: Deploy Migrations
         run: |
-          supabase link --project-ref allmppmerqiltcodxdbk
+          supabase link --project-ref allmppmerqiltcodxdbk --password "$SUPABASE_DB_PASSWORD"
           supabase db push
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
