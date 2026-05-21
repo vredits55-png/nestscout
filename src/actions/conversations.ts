@@ -8,6 +8,10 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  if (user.id === landlordId) {
+    return { error: "You cannot inquire about or rent your own property." };
+  }
+
   // Check if conversation exists
   const { data: existing } = await supabase
     .from("conversations")

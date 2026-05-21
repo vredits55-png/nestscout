@@ -24,6 +24,10 @@ export default async function ConversationPage({ params }: ConversationPageProps
   const conversation = await getConversation(id);
   if (!conversation) notFound();
 
+  if (conversation.landlord_id === conversation.tenant_id) {
+    redirect("/conversations");
+  }
+
   const messages = await getMessages(id);
   const bookings = await getBookingRequests(id);
 
