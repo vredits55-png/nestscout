@@ -1,6 +1,7 @@
 "use client";
 
-import { MapContainer, TileLayer, Marker, Popup, useMapEvents } from "react-leaflet";
+import { useEffect } from "react";
+import { MapContainer, TileLayer, Marker, Popup, useMapEvents, useMap } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { formatCurrency } from "@/lib/utils";
@@ -73,6 +74,29 @@ function BoundsTracker({
   return null;
 }
 
+function MapResizer() {
+  const map = useMap();
+  useEffect(() => {
+    // Invalidate size immediately
+    map.invalidateSize();
+    
+    // Invalidate size after short delays to ensure parent animations and layout transitions have finished
+    const timer1 = setTimeout(() => {
+      map.invalidateSize();
+    }, 150);
+    
+    const timer2 = setTimeout(() => {
+      map.invalidateSize();
+    }, 500);
+
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [map]);
+  return null;
+}
+
 export default function MapInner({
   properties,
   center = [40.7128, -74.006],
@@ -105,6 +129,7 @@ export default function MapInner({
         noWrap={true}
       />
       <BoundsTracker onBoundsChange={onBoundsChange} />
+      <MapResizer />
 
       {properties.map((property) => (
         <Marker
