@@ -51,7 +51,7 @@ export default function SelectRolePage() {
               <img src="/logo.png" alt="NestScout" className="w-12 h-12 object-contain" />
             </div>
             <h1 className="text-3xl md:text-4xl font-bold text-text mb-3 tracking-tight">
-              Choose Your Matrix Role
+              Choose Your Role
             </h1>
             <p className="text-text-muted text-sm md:text-base font-medium max-w-md mx-auto">
               Welcome to NestScout! Tell us how you intend to interact with the platform so we can customize your dashboard.

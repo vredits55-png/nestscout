@@ -170,7 +170,7 @@ export default function LoginPage() {
               Welcome back
             </h1>
             <p className="text-text-muted text-sm font-medium">
-              Log in to your NestScout matrix.
+              Log in to your NestScout account.
             </p>
           </div>
 
@@ -230,7 +230,7 @@ export default function LoginPage() {
                   <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
                 ) : (
                   <>
-                    Enter Matrix
+                    Sign In
                     <LogIn className="w-5 h-5" />
                   </>
                 )}
@@ -330,7 +330,7 @@ export default function LoginPage() {
                       <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
                       <>
-                        Verify & Enter Matrix
+                        Verify & Log In
                         <LogIn className="w-5 h-5" />
                       </>
                     )}

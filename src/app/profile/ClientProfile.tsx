@@ -164,7 +164,7 @@ export default function ProfilePage({
                 <div>
                   <h2 className="font-headline font-black text-2xl sm:text-3xl text-on-surface">Welcome back, {fullName ? fullName.split(' ')[0] : 'User'}</h2>
                   <p className="text-sm sm:text-base text-primary font-bold uppercase tracking-widest mt-1">
-                     {isProvider ? "Property Curator" : "Digital Resident Level 1"}
+                     {isProvider ? "Landlord" : "Tenant"}
                   </p>
                 </div>
               </div>
@@ -204,7 +204,7 @@ export default function ProfilePage({
                       </div>
                       <div className="px-2">
                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-headline font-bold text-lg">Your Next Epoch</h4>
+                            <h4 className="font-headline font-bold text-lg">Your Next Home</h4>
                          </div>
                          <p className="text-xs text-on-surface-variant flex items-center gap-1">
                             <MapPin className="w-3 h-3"/> Discover the collections
@@ -214,18 +214,18 @@ export default function ProfilePage({
                  </div>
               </section>
 
-              {/* Dossier Form */}
+              {/* Profile Information Form */}
               <section className="bg-surface-container-lowest rounded-[2.5rem] p-8 shadow-ambient border border-outline-variant/20 mt-10">
                  <h3 className="font-headline font-bold text-xl text-on-surface mb-6 px-2 flex items-center gap-3">
                     <Shield className="w-6 h-6 text-primary"/>
-                    Identity Dossier
+                    Profile Information
                  </h3>
 
                  <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-[1.5rem]">
                       <label className="input-label flex items-center gap-2 mb-2">
                         <Mail className="w-4 h-4 text-primary" />
-                        Communication Channel
+                        Email Address
                       </label>
                       <input
                         type="email"
@@ -233,13 +233,13 @@ export default function ProfilePage({
                         disabled
                         className="input-field opacity-60 bg-surface-variant cursor-not-allowed font-body"
                       />
-                      <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-2 ml-2">Email designation is securely locked.</p>
+                      <p className="text-[10px] font-bold text-outline uppercase tracking-widest mt-2 ml-2">Email address cannot be changed.</p>
                     </div>
 
                     <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-[1.5rem]">
                       <label className="input-label flex items-center gap-2 mb-2">
                         <User className="w-4 h-4 text-primary" />
-                        Primary Identifier
+                        Full Name
                       </label>
                       <input
                         type="text"
@@ -254,7 +254,7 @@ export default function ProfilePage({
                     <div className="p-5 bg-surface-container-low border border-outline-variant/10 rounded-[1.5rem]">
                       <label className="input-label flex items-center gap-2 mb-2">
                         <Phone className="w-4 h-4 text-primary" />
-                        Direct Line
+                        Phone Number
                       </label>
                       <input
                         type="tel"
@@ -274,7 +274,7 @@ export default function ProfilePage({
                     {success && (
                       <div className="p-4 rounded-[1rem] bg-primary/10 text-primary font-bold text-sm border-2 border-primary/30 flex items-center justify-center gap-2 animate-scale-in">
                         <CheckCircle className="w-5 h-5" />
-                        Dossier meticulously updated.
+                        Profile updated successfully.
                       </div>
                     )}
 

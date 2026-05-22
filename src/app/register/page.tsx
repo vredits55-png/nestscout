@@ -49,10 +49,10 @@ function RegisterContent() {
               <img src="/logo.png" alt="NestScout" className="w-12 h-12 object-contain" />
             </div>
             <h1 className="text-3xl font-bold text-text mb-2 tracking-tight">
-              Initialize NestScout
+              Create Account
             </h1>
             <p className="text-text-muted text-sm font-medium">
-              Create your profile to access premium real estate nodes.
+              Create your profile to access premium real estate listings.
             </p>
           </div>
 
@@ -67,7 +67,7 @@ function RegisterContent() {
               }`}
             >
               <User className="w-5 h-5" />
-              Tenant Node
+              Tenant
             </button>
             <button
               type="button"
@@ -79,7 +79,7 @@ function RegisterContent() {
               }`}
             >
               <Building className="w-5 h-5" />
-              Landlord Node
+              Landlord
             </button>
           </div>
 
@@ -98,33 +98,33 @@ function RegisterContent() {
           <form onSubmit={onSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-bold text-primary mb-2">
-                User Designation
+                Full Name
               </label>
               <input
                 type="text"
                 name="full_name"
                 required
                 className="w-full px-5 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
-                placeholder="Ex. Neo"
+                placeholder="Ex. John Doe"
               />
             </div>
 
             <div>
               <label className="block text-sm font-bold text-primary mb-2">
-                Comm-Link (Email)
+                Email Address
               </label>
               <input
                 type="email"
                 name="email"
                 required
                 className="w-full px-5 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
-                placeholder="Ex. the.one@matrix.com"
+                placeholder="Ex. john.doe@example.com"
               />
             </div>
 
             <div>
               <label className="block text-sm font-bold text-primary mb-2">
-                Encryption Key (Password)
+                Password
               </label>
               <input
                 type="password"
@@ -134,7 +134,7 @@ function RegisterContent() {
                 className="w-full px-5 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
                 placeholder="••••••••"
               />
-              <p className="text-xs text-text-muted font-medium mt-2">Requires 6+ characters for security clearance.</p>
+              <p className="text-xs text-text-muted font-medium mt-2">Must be at least 6 characters.</p>
             </div>
 
             <button
@@ -146,7 +146,7 @@ function RegisterContent() {
                 <div className="w-6 h-6 border-4 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  Connect to Network
+                  Sign Up
                   <UserPlus className="w-5 h-5 ml-2" />
                 </>
               )}
@@ -155,7 +155,7 @@ function RegisterContent() {
 
           <div className="mt-8 pt-6 border-t border-border text-center">
             <p className="text-sm text-text-muted font-medium">
-              Already initialized?{" "}
+              Already have an account?{" "}
               <Link href="/login" className="font-bold text-primary hover:text-accent transition-colors">
                 Return to Login
               </Link>
