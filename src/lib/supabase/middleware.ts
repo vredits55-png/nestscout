@@ -42,21 +42,40 @@ export async function updateSession(request: NextRequest) {
   }
 
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
+  const isSelectRolePage = pathname === "/select-role";
 
   // If NOT logged in and NOT on an auth page, redirect to login
   if (!user && !isAuthPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
-    // Optionally preserve the original URL to redirect back after login
-    // url.searchParams.set("redirect_to", pathname);
     return NextResponse.redirect(url);
   }
 
-  // If LOGGED IN and trying to access login/register, redirect to home
-  if (user && isAuthPage) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/";
-    return NextResponse.redirect(url);
+  // If LOGGED IN
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const role = profile?.role;
+
+    // If role is 'undecided', they MUST complete selection
+    if (role === "undecided") {
+      if (!isSelectRolePage) {
+        const url = request.nextUrl.clone();
+        url.pathname = "/select-role";
+        return NextResponse.redirect(url);
+      }
+    } else {
+      // If role is decided, redirect away from onboarding or auth pages
+      if (isSelectRolePage || isAuthPage) {
+        const url = request.nextUrl.clone();
+        url.pathname = role === "provider" ? "/provider/dashboard" : "/";
+        return NextResponse.redirect(url);
+      }
+    }
   }
 
   return supabaseResponse;

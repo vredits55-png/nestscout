@@ -123,7 +123,7 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (pathname === "/login" || pathname === "/register") return null;
+  if (pathname === "/login" || pathname === "/register" || pathname === "/select-role") return null;
 
   return (
     <nav 

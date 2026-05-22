@@ -11,12 +11,21 @@ export async function GET(request: Request) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (!error) {
       try {
-        const { data: profile } = await supabase
-          .from("profiles")
-          .select("role")
-          .single();
-        
-        const redirectUrl = profile?.role === "provider" ? "/provider/dashboard" : next;
+        const { data: { user } } = await supabase.auth.getUser();
+        let redirectUrl = next;
+        if (user) {
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+          
+          if (profile?.role === "undecided") {
+            redirectUrl = "/select-role";
+          } else if (profile?.role === "provider") {
+            redirectUrl = "/provider/dashboard";
+          }
+        }
         return NextResponse.redirect(`${origin}${redirectUrl}`);
       } catch {
         return NextResponse.redirect(`${origin}${next}`);

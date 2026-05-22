@@ -51,13 +51,24 @@ export async function signIn(formData: FormData) {
     return { error: error.message };
   }
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("role")
-    .single();
+  const { data: { user } } = await supabase.auth.getUser();
+  let redirectUrl = "/";
+  if (user) {
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profile?.role === "provider") {
+      redirectUrl = "/provider/dashboard";
+    } else if (profile?.role === "undecided") {
+      redirectUrl = "/select-role";
+    }
+  }
 
   revalidatePath("/", "layout");
-  redirect(profile?.role === "provider" ? "/provider/dashboard" : "/");
+  redirect(redirectUrl);
 }
 
 export async function signOut() {
@@ -83,4 +94,27 @@ export async function getUser() {
     .single();
 
   return profile;
+}
+
+export async function selectUserRole(role: "client" | "provider") {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Not authenticated" };
+  }
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ role })
+    .eq("id", user.id);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true };
 }
