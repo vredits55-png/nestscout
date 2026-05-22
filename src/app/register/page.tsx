@@ -4,7 +4,7 @@ import { useState, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { signUp } from "@/actions/auth";
-import { UserPlus, ArrowLeft, User, Building } from "lucide-react";
+import { UserPlus, ArrowLeft, User, Building, Eye, EyeOff } from "lucide-react";
 
 function RegisterContent() {
   const searchParams = useSearchParams();
@@ -14,6 +14,7 @@ function RegisterContent() {
   const [error, setError] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -126,14 +127,28 @@ function RegisterContent() {
               <label className="block text-sm font-bold text-primary mb-2">
                 Password
               </label>
-              <input
-                type="password"
-                name="password"
-                required
-                minLength={6}
-                className="w-full px-5 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
-                placeholder="••••••••"
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  required
+                  minLength={6}
+                  className="w-full pl-5 pr-12 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
+                  placeholder="••••••••"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-primary/50 hover:text-primary transition-colors cursor-pointer p-1 rounded-md focus:outline-none flex items-center justify-center"
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
               <p className="text-xs text-text-muted font-medium mt-2">Must be at least 6 characters.</p>
             </div>
 
