@@ -1,5 +1,6 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { getSessionProvider } from "@/lib/auth-helpers";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request });
@@ -26,8 +27,9 @@ export async function updateSession(request: NextRequest) {
   );
 
   const {
-    data: { user },
-  } = await supabase.auth.getUser();
+    data: { session },
+  } = await supabase.auth.getSession();
+  const user = session?.user;
 
   const pathname = request.nextUrl.pathname;
 
@@ -55,11 +57,25 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, provider")
       .eq("id", user.id)
       .single();
 
     const role = profile?.role;
+    const profileProvider = profile?.provider;
+    const sessionProvider = getSessionProvider(session);
+
+    // Security check: if login method doesn't match registered method, force log out
+    if (profileProvider && sessionProvider && profileProvider !== sessionProvider) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set(
+        "error",
+        `This email is already registered using ${profileProvider === 'email' ? 'Password' : profileProvider}. Please sign in using that method.`
+      );
+      return NextResponse.redirect(url);
+    }
 
     // If role is 'undecided', they MUST complete selection
     if (role === "undecided") {

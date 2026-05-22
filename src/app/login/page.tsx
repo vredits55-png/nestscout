@@ -5,7 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { signIn } from "@/actions/auth";
 import { createClient } from "@/lib/supabase/client";
-import { LogIn, KeyRound, Mail, Sparkles, ChevronLeft } from "lucide-react";
+import { LogIn, Mail, Sparkles, ChevronLeft } from "lucide-react";
+import { getSessionProvider } from "@/lib/auth-helpers";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,6 +49,9 @@ export default function LoginPage() {
         options: {
           shouldCreateUser: true,
           emailRedirectTo: `${window.location.origin}/api/auth/callback`,
+          data: {
+            provider: "otp"
+          }
         }
       });
 
@@ -86,9 +90,20 @@ export default function LoginPage() {
         try {
           const { data: profile } = await supabase
             .from("profiles")
-            .select("role")
+            .select("role, provider")
             .eq("id", data.user?.id)
             .single();
+
+          const profileProvider = profile?.provider;
+          const session = (await supabase.auth.getSession()).data.session;
+          const sessionProvider = getSessionProvider(session);
+
+          if (profileProvider && sessionProvider && profileProvider !== sessionProvider) {
+            await supabase.auth.signOut();
+            setError(`This email is already registered using ${profileProvider === 'email' ? 'Password' : profileProvider}. Please sign in using that method.`);
+            setLoading(false);
+            return;
+          }
           
           router.push(profile?.role === "provider" ? "/provider/dashboard" : "/");
           router.refresh();
@@ -131,6 +146,15 @@ export default function LoginPage() {
       <div className="absolute bottom-1/4 left-10 w-80 h-80 rounded-full bg-accent/20 blur-3xl animate-float delay-300 mix-blend-multiply" />
 
       <div className="w-full max-w-md relative z-10">
+        <div className="flex justify-end mb-3 animate-fade-in-up">
+          <Link
+            href="/register"
+            className="text-xs font-bold px-4 py-2 rounded-full border border-primary/20 bg-white/40 hover:bg-white hover:border-primary/50 text-primary transition-all shadow-md backdrop-blur-md"
+          >
+            Create account
+          </Link>
+        </div>
+
         <div className="glass rounded-3xl p-8 animate-fade-in-up shadow-2xl border border-white/20">
           <div className="text-center mb-6">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center mx-auto mb-4 shadow-glow">
@@ -142,41 +166,6 @@ export default function LoginPage() {
             <p className="text-text-muted text-sm font-medium">
               Log in to your NestScout matrix.
             </p>
-          </div>
-
-          {/* Mode Switcher */}
-          <div className="flex bg-white/40 p-1.5 rounded-2xl border border-primary/10 mb-6">
-            <button
-              onClick={() => {
-                setAuthMode("password");
-                setError("");
-                setSuccessMessage("");
-              }}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                authMode === "password"
-                  ? "bg-primary text-white shadow-md scale-[1.02]"
-                  : "text-text-muted hover:text-primary hover:bg-white/30"
-              }`}
-            >
-              <KeyRound className="w-4 h-4" />
-              Password
-            </button>
-            <button
-              onClick={() => {
-                setAuthMode("otp");
-                setOtpStep("request");
-                setError("");
-                setSuccessMessage("");
-              }}
-              className={`flex-1 py-2.5 text-sm font-bold rounded-xl transition-all duration-300 flex items-center justify-center gap-2 ${
-                authMode === "otp"
-                  ? "bg-primary text-white shadow-md scale-[1.02]"
-                  : "text-text-muted hover:text-primary hover:bg-white/30"
-              }`}
-            >
-              <Mail className="w-4 h-4" />
-              Email OTP
-            </button>
           </div>
 
           {error && (
@@ -276,6 +265,20 @@ export default function LoginPage() {
                       </>
                     )}
                   </button>
+
+                  <div className="text-center mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("password");
+                        setError("");
+                        setSuccessMessage("");
+                      }}
+                      className="text-xs font-bold text-primary hover:text-accent hover:underline transition-colors focus:outline-none"
+                    >
+                      Back to Password Login
+                    </button>
+                  </div>
                 </form>
               ) : (
                 <form onSubmit={handleVerifyOtp} className="space-y-5">
@@ -326,6 +329,21 @@ export default function LoginPage() {
                       </>
                     )}
                   </button>
+
+                  <div className="text-center mt-4">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode("password");
+                        setOtpStep("request");
+                        setError("");
+                        setSuccessMessage("");
+                      }}
+                      className="text-xs font-bold text-primary hover:text-accent hover:underline transition-colors focus:outline-none"
+                    >
+                      Back to Password Login
+                    </button>
+                  </div>
                 </form>
               )}
             </div>
@@ -342,7 +360,7 @@ export default function LoginPage() {
           </div>
 
           {/* Social Logins Buttons Grid */}
-          <div className="grid grid-cols-3 gap-3.5">
+          <div className="grid grid-cols-4 gap-3">
             {/* Google OAuth */}
             <button
               type="button"
@@ -387,15 +405,23 @@ export default function LoginPage() {
               </svg>
               <span className="text-[10px] font-bold text-text-muted mt-1.5">X (Twitter)</span>
             </button>
-          </div>
 
-          <div className="mt-8 pt-6 border-t border-border text-center">
-            <p className="text-sm text-text-muted font-medium">
-              First time here?{" "}
-              <Link href="/register" className="font-bold text-primary hover:text-accent transition-colors">
-                Initialize an account
-              </Link>
-            </p>
+            {/* Email OTP Connection */}
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode("otp");
+                setOtpStep("request");
+                setError("");
+                setSuccessMessage("");
+              }}
+              disabled={loading}
+              className="flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-primary/10 bg-white/40 hover:bg-white hover:border-primary/30 transition-all duration-300 hover:shadow-md cursor-pointer group"
+              title="Sign in with Email OTP"
+            >
+              <Mail className="w-6 h-6 text-primary transition-transform duration-300 group-hover:scale-110" />
+              <span className="text-[10px] font-bold text-text-muted mt-1.5">OTP</span>
+            </button>
           </div>
         </div>
       </div>

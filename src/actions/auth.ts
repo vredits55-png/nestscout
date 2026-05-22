@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { getSessionProvider } from "@/lib/auth-helpers";
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
@@ -42,7 +43,7 @@ export async function signIn(formData: FormData) {
   const email = formData.get("email") as string;
   const password = formData.get("password") as string;
 
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email,
     password,
   });
@@ -51,14 +52,26 @@ export async function signIn(formData: FormData) {
     return { error: error.message };
   }
 
-  const { data: { user } } = await supabase.auth.getUser();
+  const user = data.user;
+  const session = data.session;
   let redirectUrl = "/";
+
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role")
+      .select("role, provider")
       .eq("id", user.id)
       .single();
+
+    const profileProvider = profile?.provider;
+    const sessionProvider = getSessionProvider(session);
+
+    if (profileProvider && sessionProvider && profileProvider !== sessionProvider) {
+      await supabase.auth.signOut();
+      return {
+        error: `This email is already registered using ${profileProvider === 'email' ? 'Password' : profileProvider}. Please sign in using that method.`,
+      };
+    }
 
     if (profile?.role === "provider") {
       redirectUrl = "/provider/dashboard";
