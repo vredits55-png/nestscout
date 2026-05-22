@@ -128,6 +128,7 @@ export default function LoginPage() {
         provider,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
+          queryParams: provider === "google" ? { prompt: "select_account" } : undefined,
         },
       });
       if (oauthError) {

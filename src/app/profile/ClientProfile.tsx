@@ -60,6 +60,7 @@ export default function ProfilePage({
         provider: provider as any,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback?linking=true&provider=${provider}`,
+          queryParams: provider === "google" ? { prompt: "select_account" } : undefined,
         },
       });
 
