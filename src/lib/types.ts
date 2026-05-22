@@ -8,6 +8,8 @@ export interface Profile {
   phone?: string;
   avatar_url?: string;
   created_at: string;
+  provider?: string;
+  linked_providers?: string[];
 }
 
 export interface Property {

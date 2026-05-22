@@ -57,16 +57,22 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, provider")
+      .select("role, provider, linked_providers")
       .eq("id", user.id)
       .single();
 
     const role = profile?.role;
     const profileProvider = profile?.provider;
+    const linkedProviders = profile?.linked_providers || [];
     const sessionProvider = getSessionProvider(session);
 
     // Security check: if login method doesn't match registered method, force log out
-    if (profileProvider && sessionProvider && profileProvider !== sessionProvider) {
+    if (
+      profileProvider &&
+      sessionProvider &&
+      profileProvider !== sessionProvider &&
+      !linkedProviders.includes(sessionProvider)
+    ) {
       await supabase.auth.signOut();
       const url = request.nextUrl.clone();
       url.pathname = "/login";

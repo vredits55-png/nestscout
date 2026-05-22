@@ -59,14 +59,20 @@ export async function signIn(formData: FormData) {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, provider")
+      .select("role, provider, linked_providers")
       .eq("id", user.id)
       .single();
 
     const profileProvider = profile?.provider;
+    const linkedProviders = profile?.linked_providers || [];
     const sessionProvider = getSessionProvider(session);
 
-    if (profileProvider && sessionProvider && profileProvider !== sessionProvider) {
+    if (
+      profileProvider &&
+      sessionProvider &&
+      profileProvider !== sessionProvider &&
+      !linkedProviders.includes(sessionProvider)
+    ) {
       await supabase.auth.signOut();
       return {
         error: `This email is already registered using ${profileProvider === 'email' ? 'Password' : profileProvider}. Please sign in using that method.`,

@@ -20,5 +20,11 @@ export default async function ProfilePage() {
     redirect("/login");
   }
 
-  return <ClientProfile initialProfile={profile} userEmail={user.email || ""} />;
+  return (
+    <ClientProfile
+      initialProfile={profile}
+      userEmail={user.email || ""}
+      initialIdentities={user.identities || []}
+    />
+  );
 }
