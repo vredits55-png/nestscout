@@ -100,6 +100,7 @@
 }
 
 html {
+  overflow-y: auto;
   overflow-x: hidden;
   height: auto;
 }
@@ -108,7 +109,8 @@ body {
   font-family: var(--font-body);
   color: var(--color-on-surface);
   background: var(--color-surface);
-  overflow: visible;
+  overflow-y: visible !important;
+  overflow-x: hidden;
   line-height: 1.6;
 }
 

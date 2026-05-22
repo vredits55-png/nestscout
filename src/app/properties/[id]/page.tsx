@@ -35,7 +35,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
   const isFavorited = favoriteIds.includes(property.id);
 
   return (
-    <div className="min-h-screen bg-background relative pb-24">
+    <div className="min-h-screen bg-background relative pb-24 overflow-x-hidden">
       {/* Animated Floating Background Elements */}
       <div className="floating-blob w-96 h-96 bg-primary-fixed top-[-10%] left-[-10%] rounded-full animate-float"></div>
       <div className="floating-blob w-80 h-80 bg-tertiary-fixed-dim top-[40%] right-[-5%] rounded-full animate-float-delayed"></div>

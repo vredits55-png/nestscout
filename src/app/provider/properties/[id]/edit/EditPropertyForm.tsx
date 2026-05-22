@@ -177,7 +177,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="input-label flex items-center gap-1">
                     <Bed className="w-3.5 h-3.5" />
@@ -241,7 +241,7 @@ export default function EditPropertyForm({ property }: EditPropertyFormProps) {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="input-label">City</label>
                   <input
