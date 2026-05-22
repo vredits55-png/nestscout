@@ -66,12 +66,17 @@ export async function updateSession(request: NextRequest) {
     const linkedProviders = profile?.linked_providers || [];
     const sessionProvider = getSessionProvider(session);
 
+    const isEquivalent = (p1: string, p2: string) => 
+      p1 === p2 || (p1 === "twitter" && p2 === "x") || (p1 === "x" && p2 === "twitter");
+
+    const isSessionProviderLinked = linkedProviders.some((lp: string) => isEquivalent(lp, sessionProvider));
+
     // Security check: if login method doesn't match registered method, force log out
     if (
       profileProvider &&
       sessionProvider &&
-      profileProvider !== sessionProvider &&
-      !linkedProviders.includes(sessionProvider)
+      !isEquivalent(profileProvider, sessionProvider) &&
+      !isSessionProviderLinked
     ) {
       await supabase.auth.signOut();
       const url = request.nextUrl.clone();

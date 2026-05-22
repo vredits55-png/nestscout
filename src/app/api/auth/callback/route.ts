@@ -26,8 +26,9 @@ export async function GET(request: Request) {
 
           if (linking && linkingProvider) {
             // Prevent security breach: Check if the linked identity already exists under another user
+            const actualLinkingProvider = linkingProvider === "twitter" ? "x" : linkingProvider;
             const linkedIdentity = user.identities?.find(
-              (id) => id.provider === linkingProvider
+              (id) => id.provider === actualLinkingProvider || id.provider === linkingProvider
             );
             if (linkedIdentity) {
               const identityEmail = linkedIdentity.identity_data?.email;
@@ -41,10 +42,11 @@ export async function GET(request: Request) {
                 if (existingProfile && existingProfile.id !== user.id) {
                   // Immediately unlink to prevent session merger / hijack
                   await supabase.auth.unlinkIdentity(linkedIdentity);
+                  const providerName = (linkingProvider === "twitter" || linkingProvider === "x")
+                    ? "X (Twitter)"
+                    : linkingProvider.charAt(0).toUpperCase() + linkingProvider.slice(1);
                   return NextResponse.redirect(
-                    `${origin}/profile?error=Security violation: This ${
-                      linkingProvider === "twitter" ? "X (Twitter)" : linkingProvider.charAt(0).toUpperCase() + linkingProvider.slice(1)
-                    } account is already registered to another user.`
+                    `${origin}/profile?error=Security violation: This ${providerName} account is already registered to another user.`
                   );
                 }
               }
@@ -66,11 +68,16 @@ export async function GET(request: Request) {
           const linkedProviders = profile?.linked_providers || [];
           const sessionProvider = getSessionProvider(session);
 
+          const isEquivalent = (p1: string, p2: string) => 
+            p1 === p2 || (p1 === "twitter" && p2 === "x") || (p1 === "x" && p2 === "twitter");
+
+          const isSessionProviderLinked = linkedProviders.some((lp: string) => isEquivalent(lp, sessionProvider));
+
           if (
             profileProvider &&
             sessionProvider &&
-            profileProvider !== sessionProvider &&
-            !linkedProviders.includes(sessionProvider)
+            !isEquivalent(profileProvider, sessionProvider) &&
+            !isSessionProviderLinked
           ) {
             await supabase.auth.signOut();
             return NextResponse.redirect(

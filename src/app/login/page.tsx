@@ -98,7 +98,10 @@ export default function LoginPage() {
           const session = (await supabase.auth.getSession()).data.session;
           const sessionProvider = getSessionProvider(session);
 
-          if (profileProvider && sessionProvider && profileProvider !== sessionProvider) {
+          const isEquivalent = (p1: string, p2: string) => 
+            p1 === p2 || (p1 === "twitter" && p2 === "x") || (p1 === "x" && p2 === "twitter");
+
+          if (profileProvider && sessionProvider && !isEquivalent(profileProvider, sessionProvider)) {
             await supabase.auth.signOut();
             setError(`This email is already registered using ${profileProvider === 'email' ? 'Password' : profileProvider}. Please sign in using that method.`);
             setLoading(false);
@@ -124,11 +127,13 @@ export default function LoginPage() {
     setSuccessMessage("");
     try {
       const supabase = createClient();
+      // Map 'twitter' to the new 'x' OAuth 2.0 provider name in Supabase
+      const actualProvider = provider === "twitter" ? "x" : provider;
       const { error: oauthError } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: actualProvider,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback`,
-          queryParams: provider === "google" ? { prompt: "select_account" } : undefined,
+          queryParams: actualProvider === "google" ? { prompt: "select_account" } : undefined,
         },
       });
       if (oauthError) {

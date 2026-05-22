@@ -56,11 +56,13 @@ export default function ProfilePage({
 
     try {
       const supabase = createClient();
+      // Map 'twitter' to the new 'x' OAuth 2.0 provider name in Supabase
+      const actualProvider = provider === "twitter" ? "x" : provider;
       const { data, error } = await supabase.auth.linkIdentity({
-        provider: provider as any,
+        provider: actualProvider as any,
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback?linking=true&provider=${provider}`,
-          queryParams: provider === "google" ? { prompt: "select_account" } : undefined,
+          queryParams: actualProvider === "google" ? { prompt: "select_account" } : undefined,
         },
       });
 
@@ -89,7 +91,8 @@ export default function ProfilePage({
       const { data: { user } } = await supabase.auth.getUser();
       const currentIdentities = user?.identities || identities;
 
-      const identity = currentIdentities.find(id => id.provider === provider);
+      const actualProvider = provider === "twitter" ? "x" : provider;
+      const identity = currentIdentities.find(id => id.provider === provider || id.provider === actualProvider);
       if (identity) {
         const { error: unlinkAuthError } = await supabase.auth.unlinkIdentity(identity);
         if (unlinkAuthError) {
@@ -349,8 +352,10 @@ export default function ProfilePage({
                           )
                         }
                       ].map((item) => {
-                        const isPrimary = initialProfile.provider === item.id;
-                        const isLinked = linkedProviders.includes(item.id) || identities.some(id => id.provider === item.id);
+                        const isPrimary = initialProfile.provider === item.id || (item.id === "twitter" && initialProfile.provider === "x");
+                        const isLinked = linkedProviders.includes(item.id) || 
+                          (item.id === "twitter" && linkedProviders.includes("x")) ||
+                          identities.some(id => id.provider === item.id || (item.id === "twitter" && id.provider === "x"));
                         
                         return (
                           <div key={item.id} className="p-4 bg-surface-container-low rounded-[1.5rem] border border-outline-variant/10 flex items-center justify-between gap-4 hover:scale-[1.01] transition-transform duration-300">
