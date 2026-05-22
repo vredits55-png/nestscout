@@ -13,10 +13,10 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
   const [loading, setLoading] = useState(false);
-  
+
   // Auth mode: 'password' or 'otp'
   const [authMode, setAuthMode] = useState<"password" | "otp">("password");
-  
+
   // OTP sub-steps: 'request' or 'verify'
   const [otpStep, setOtpStep] = useState<"request" | "verify">("request");
   const [email, setEmail] = useState("");
@@ -41,7 +41,7 @@ export default function LoginPage() {
     setLoading(true);
     setError("");
     setSuccessMessage("");
-    
+
     try {
       const supabase = createClient();
       const { error: otpError } = await supabase.auth.signInWithOtp({
@@ -98,7 +98,7 @@ export default function LoginPage() {
           const session = (await supabase.auth.getSession()).data.session;
           const sessionProvider = getSessionProvider(session);
 
-          const isEquivalent = (p1: string, p2: string) => 
+          const isEquivalent = (p1: string, p2: string) =>
             p1 === p2 || (p1 === "twitter" && p2 === "x") || (p1 === "x" && p2 === "twitter");
 
           if (profileProvider && sessionProvider && !isEquivalent(profileProvider, sessionProvider)) {
@@ -107,7 +107,7 @@ export default function LoginPage() {
             setLoading(false);
             return;
           }
-          
+
           router.push(profile?.role === "provider" ? "/provider/dashboard" : "/");
           router.refresh();
         } catch {
@@ -199,7 +199,7 @@ export default function LoginPage() {
                   name="email"
                   required
                   className="w-full px-5 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
-                  placeholder="Ex. pilot@nestscout.com"
+                  placeholder="Ex. john.doe@example.com"
                 />
               </div>
 
@@ -253,7 +253,7 @@ export default function LoginPage() {
                       onChange={(e) => setEmail(e.target.value)}
                       required
                       className="w-full px-5 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
-                      placeholder="Ex. pilot@nestscout.com"
+                      placeholder="Ex. john.doe@example.com"
                     />
                   </div>
 
