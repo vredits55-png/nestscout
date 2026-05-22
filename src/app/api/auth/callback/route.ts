@@ -8,6 +8,7 @@ export async function GET(request: Request) {
   const next = searchParams.get("next") ?? "/";
   const linking = searchParams.get("linking") === "true";
   const linkingProvider = searchParams.get("provider");
+  const originalUserId = searchParams.get("userId");
 
   if (code) {
     const supabase = await createClient();
@@ -18,13 +19,19 @@ export async function GET(request: Request) {
         const session = data.session;
         let redirectUrl = next;
         if (user) {
-          const { data: profile } = await supabase
-            .from("profiles")
-            .select("role, provider, linked_providers")
-            .eq("id", user.id)
-            .single();
-
           if (linking && linkingProvider) {
+            const providerName = (linkingProvider === "twitter" || linkingProvider === "x")
+              ? "X (Twitter)"
+              : linkingProvider.charAt(0).toUpperCase() + linkingProvider.slice(1);
+
+            // If the active session is now a different user, it means the linked identity is owned by another existing user account
+            if (originalUserId && user.id !== originalUserId) {
+              await supabase.auth.signOut();
+              return NextResponse.redirect(
+                `${origin}/profile?error=This ${providerName} account is already registered to another user.`
+              );
+            }
+
             // Prevent security breach: Check if the linked identity already exists under another user
             const actualLinkingProvider = linkingProvider === "twitter" ? "x" : linkingProvider;
             const linkedIdentity = user.identities?.find(
@@ -42,9 +49,6 @@ export async function GET(request: Request) {
                 if (existingProfile && existingProfile.id !== user.id) {
                   // Immediately unlink to prevent session merger / hijack
                   await supabase.auth.unlinkIdentity(linkedIdentity);
-                  const providerName = (linkingProvider === "twitter" || linkingProvider === "x")
-                    ? "X (Twitter)"
-                    : linkingProvider.charAt(0).toUpperCase() + linkingProvider.slice(1);
                   return NextResponse.redirect(
                     `${origin}/profile?error=Security violation: This ${providerName} account is already registered to another user.`
                   );
@@ -53,6 +57,12 @@ export async function GET(request: Request) {
             }
 
             // Update linked_providers in DB
+            const { data: profile } = await supabase
+              .from("profiles")
+              .select("linked_providers")
+              .eq("id", user.id)
+              .single();
+
             const currentLinked = profile?.linked_providers || [];
             if (!currentLinked.includes(linkingProvider)) {
               const updatedLinked = [...currentLinked, linkingProvider];
@@ -63,6 +73,12 @@ export async function GET(request: Request) {
             }
             return NextResponse.redirect(`${origin}/profile?linked=success&provider=${linkingProvider}`);
           }
+
+          const { data: profile } = await supabase
+            .from("profiles")
+            .select("role, provider, linked_providers")
+            .eq("id", user.id)
+            .single();
           
           const profileProvider = profile?.provider;
           const linkedProviders = profile?.linked_providers || [];
@@ -85,10 +101,12 @@ export async function GET(request: Request) {
             );
           }
 
-          if (profile?.role === "undecided") {
-            redirectUrl = "/select-role";
-          } else if (profile?.role === "provider") {
-            redirectUrl = "/provider/dashboard";
+          if (next === "/") {
+            if (profile?.role === "undecided") {
+              redirectUrl = "/select-role";
+            } else if (profile?.role === "provider") {
+              redirectUrl = "/provider/dashboard";
+            }
           }
         }
         return NextResponse.redirect(`${origin}${redirectUrl}`);

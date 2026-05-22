@@ -67,7 +67,7 @@ function RegisterContent() {
               }`}
             >
               <User className="w-5 h-5" />
-              Tenant
+              Renter
             </button>
             <button
               type="button"
@@ -79,7 +79,7 @@ function RegisterContent() {
               }`}
             >
               <Building className="w-5 h-5" />
-              Landlord
+              Property Owner
             </button>
           </div>
 

@@ -18,7 +18,7 @@ export default async function ConversationsPage() {
       <div className="hero-gradient pt-28 pb-10 px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-3xl font-bold text-text mb-2 animate-fade-in-up">Messages</h1>
-          <p className="text-text-muted animate-fade-in-up delay-75">Your conversations with landlords and tenants.</p>
+          <p className="text-text-muted animate-fade-in-up delay-75">Your conversations with property owners and renters.</p>
         </div>
       </div>
 

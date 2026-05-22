@@ -56,12 +56,15 @@ export default function ProfilePage({
 
     try {
       const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      const currentUserId = user?.id || "";
+
       // Map 'twitter' to the new 'x' OAuth 2.0 provider name in Supabase
       const actualProvider = provider === "twitter" ? "x" : provider;
       const { data, error } = await supabase.auth.linkIdentity({
         provider: actualProvider as any,
         options: {
-          redirectTo: `${window.location.origin}/api/auth/callback?linking=true&provider=${provider}`,
+          redirectTo: `${window.location.origin}/api/auth/callback?linking=true&provider=${provider}&userId=${currentUserId}`,
           queryParams: actualProvider === "google" ? { prompt: "select_account" } : undefined,
         },
       });
@@ -164,7 +167,7 @@ export default function ProfilePage({
                 <div>
                   <h2 className="font-headline font-black text-2xl sm:text-3xl text-on-surface">Welcome back, {fullName ? fullName.split(' ')[0] : 'User'}</h2>
                   <p className="text-sm sm:text-base text-primary font-bold uppercase tracking-widest mt-1">
-                     {isProvider ? "Landlord" : "Tenant"}
+                     {isProvider ? "Property Owner" : "Renter"}
                   </p>
                 </div>
               </div>

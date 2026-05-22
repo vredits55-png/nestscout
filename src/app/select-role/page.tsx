@@ -66,7 +66,7 @@ export default function SelectRolePage() {
 
           {/* Cards Selection Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            {/* Tenant Card */}
+            {/* Renter Card */}
             <div
               onClick={() => setSelectedRole("client")}
               className={`group relative rounded-2xl p-6 md:p-8 cursor-pointer border-2 transition-all duration-300 text-left flex flex-col justify-between min-h-[220px] ${
@@ -89,12 +89,12 @@ export default function SelectRolePage() {
                 </p>
               </div>
               <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-                <span>Select Tenant</span>
+                <span>Select Renter</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>
 
-            {/* Landlord Card */}
+            {/* Property Owner Card */}
             <div
               onClick={() => setSelectedRole("provider")}
               className={`group relative rounded-2xl p-6 md:p-8 cursor-pointer border-2 transition-all duration-300 text-left flex flex-col justify-between min-h-[220px] ${
@@ -117,7 +117,7 @@ export default function SelectRolePage() {
                 </p>
               </div>
               <div className="mt-4 flex items-center gap-1.5 text-xs font-bold text-primary uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
-                <span>Select Landlord</span>
+                <span>Select Property Owner</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </div>
             </div>

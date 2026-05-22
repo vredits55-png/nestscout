@@ -192,14 +192,14 @@ export default function LoginPage() {
             <form onSubmit={handlePasswordSubmit} className="space-y-5">
               <div>
                 <label className="block text-sm font-bold text-primary mb-2">
-                  Email Address
+                  Username or Email
                 </label>
                 <input
-                  type="email"
+                  type="text"
                   name="email"
                   required
                   className="w-full px-5 py-3.5 rounded-xl border-2 border-primary/20 bg-white/50 focus:bg-white focus:border-primary focus:ring-4 focus:ring-primary/20 transition-all outline-none text-text font-medium"
-                  placeholder="Ex. john.doe@example.com"
+                  placeholder="Username or Email"
                 />
               </div>
 
@@ -208,7 +208,7 @@ export default function LoginPage() {
                   <label className="block text-sm font-bold text-primary">
                     Password
                   </label>
-                  <Link href="#" className="text-sm font-bold text-accent hover:text-primary transition-colors">
+                  <Link href="/forgot-password" className="text-sm font-bold text-accent hover:text-primary transition-colors">
                     Forgot?
                   </Link>
                 </div>
