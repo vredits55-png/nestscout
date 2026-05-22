@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import Script from "next/script";
 
 import { getUser } from "@/actions/auth";
 import { getUnreadConversationCount } from "@/actions/conversations";
@@ -28,6 +29,14 @@ export default async function RootLayout({
 
   return (
     <html lang="en" className="min-h-screen antialiased">
+      <head>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6213864135630742"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
+      </head>
       <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container">
         <RouteLoader />
         <Navbar initialProfile={profile} unreadCount={unreadCount} />
