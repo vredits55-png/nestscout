@@ -33,7 +33,14 @@ export default function ProfilePage({
   useEffect(() => {
     const linked = searchParams.get("linked");
     const prov = searchParams.get("provider");
-    if (linked === "success" && prov) {
+    const err = searchParams.get("error");
+
+    if (err) {
+      setLinkError(err);
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, document.title, newUrl);
+      setTimeout(() => setLinkError(""), 6000);
+    } else if (linked === "success" && prov) {
       const friendlyName = prov === 'twitter' ? 'X (Twitter)' : prov.charAt(0).toUpperCase() + prov.slice(1);
       setLinkSuccess(`Successfully linked ${friendlyName} account!`);
       const newUrl = window.location.pathname;

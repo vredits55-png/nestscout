@@ -25,6 +25,31 @@ export async function GET(request: Request) {
             .single();
 
           if (linking && linkingProvider) {
+            // Prevent security breach: Check if the linked identity already exists under another user
+            const linkedIdentity = user.identities?.find(
+              (id) => id.provider === linkingProvider
+            );
+            if (linkedIdentity) {
+              const identityEmail = linkedIdentity.identity_data?.email;
+              if (identityEmail) {
+                const { data: existingProfile } = await supabase
+                  .from("profiles")
+                  .select("id")
+                  .eq("email", identityEmail)
+                  .maybeSingle();
+
+                if (existingProfile && existingProfile.id !== user.id) {
+                  // Immediately unlink to prevent session merger / hijack
+                  await supabase.auth.unlinkIdentity(linkedIdentity);
+                  return NextResponse.redirect(
+                    `${origin}/profile?error=Security violation: This ${
+                      linkingProvider === "twitter" ? "X (Twitter)" : linkingProvider.charAt(0).toUpperCase() + linkingProvider.slice(1)
+                    } account is already registered to another user.`
+                  );
+                }
+              }
+            }
+
             // Update linked_providers in DB
             const currentLinked = profile?.linked_providers || [];
             if (!currentLinked.includes(linkingProvider)) {
