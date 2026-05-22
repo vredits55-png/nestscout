@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSessionProvider } from "@/lib/auth-helpers";
+import { headers } from "next/headers";
 
 export async function signUp(formData: FormData) {
   const supabase = await createClient();
@@ -13,10 +14,16 @@ export async function signUp(formData: FormData) {
   const fullName = formData.get("full_name") as string;
   const role = formData.get("role") as string;
 
+  const headersList = await headers();
+  const host = headersList.get("host") || "localhost:3000";
+  const protocol = headersList.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
+  const origin = `${protocol}://${host}`;
+
   const { data, error } = await supabase.auth.signUp({
     email,
     password,
     options: {
+      emailRedirectTo: `${origin}/api/auth/callback`,
       data: { full_name: fullName, role },
     },
   });
