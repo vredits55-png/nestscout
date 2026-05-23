@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Calendar, DollarSign, Moon, Send, FileText } from "lucide-react";
+import { Calendar, IndianRupee, Moon, Send, FileText } from "lucide-react";
 import { createBookingRequest } from "@/actions/conversations";
 
 interface BookingRequestFormProps {
@@ -118,7 +118,7 @@ export default function BookingRequestForm({
 
       <div>
         <label className="input-label flex items-center gap-1">
-          <DollarSign className="w-3.5 h-3.5" />
+          <IndianRupee className="w-3.5 h-3.5" />
           Proposed Total Price
         </label>
         <input

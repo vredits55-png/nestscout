@@ -11,7 +11,7 @@ import {
   Bed,
   Bath,
   Maximize,
-  DollarSign,
+  IndianRupee,
   Building,
   Image as ImageIcon,
   X,
@@ -30,6 +30,75 @@ export default function NewPropertyPage() {
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([]);
   const [latitude, setLatitude] = useState(28.6139);
   const [longitude, setLongitude] = useState(77.2090);
+
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [state, setState] = useState("");
+  const [zipCode, setZipCode] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+
+  const handleLocationChange = async (lat: number, lng: number) => {
+    setLatitude(lat);
+    setLongitude(lng);
+
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`,
+        {
+          headers: {
+            "Accept-Language": "en",
+          },
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.address) {
+          const addr = data.address;
+          const streetParts = [];
+          if (addr.road) streetParts.push(addr.road);
+          if (addr.suburb) streetParts.push(addr.suburb);
+          if (addr.neighbourhood) streetParts.push(addr.neighbourhood);
+
+          setAddress(streetParts.join(", ") || data.display_name?.split(",")[0] || "");
+          setCity(addr.city || addr.town || addr.village || addr.subdistrict || addr.county || "");
+          setState(addr.state || "");
+          setZipCode(addr.postcode || "");
+        }
+      }
+    } catch (err) {
+      console.error("Reverse geocoding failed", err);
+    }
+  };
+
+  const handleSearchLocation = async () => {
+    if (!searchQuery.trim()) return;
+    setSearching(true);
+    try {
+      const res = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchQuery)}&limit=1`,
+        {
+          headers: {
+            "Accept-Language": "en",
+          },
+        }
+      );
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lng = parseFloat(data[0].lon);
+          await handleLocationChange(lat, lng);
+        } else {
+          alert("Location not found. Please try another query.");
+        }
+      }
+    } catch (err) {
+      console.error("Geocoding search failed", err);
+    } finally {
+      setSearching(false);
+    }
+  };
 
   async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
     const files = e.target.files;
@@ -138,7 +207,7 @@ export default function NewPropertyPage() {
                 </div>
                 <div>
                   <label className="input-label flex items-center gap-1">
-                    <DollarSign className="w-3.5 h-3.5" />
+                    <IndianRupee className="w-3.5 h-3.5" />
                     Price/mo
                   </label>
                   <input
@@ -200,56 +269,95 @@ export default function NewPropertyPage() {
             </h2>
 
             <div className="space-y-4">
-              <div>
-                <label className="input-label">Street Address</label>
-                <input
-                  name="address"
-                  className="input-field"
-                  placeholder="123 Main Street"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="input-label">Street Address</label>
+                  <input
+                    name="address"
+                    value={address}
+                    onChange={(e) => setAddress(e.target.value)}
+                    className="input-field"
+                    placeholder="Ex. Connaught Place, Block E"
+                    required
+                  />
+                </div>
                 <div>
                   <label className="input-label">City</label>
                   <input
                     name="city"
+                    value={city}
+                    onChange={(e) => setCity(e.target.value)}
                     required
                     className="input-field"
-                    placeholder="New York"
-                  />
-                </div>
-                <div>
-                  <label className="input-label">State</label>
-                  <input
-                    name="state"
-                    className="input-field"
-                    placeholder="NY"
-                  />
-                </div>
-                <div>
-                  <label className="input-label">Zip Code</label>
-                  <input
-                    name="zip_code"
-                    className="input-field"
-                    placeholder="10001"
+                    placeholder="Ex. New Delhi"
                   />
                 </div>
               </div>
 
-              {/* Map Picker */}
-              <div>
-                <label className="input-label flex items-center gap-1">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="input-label">State</label>
+                  <input
+                    name="state"
+                    value={state}
+                    onChange={(e) => setState(e.target.value)}
+                    required
+                    className="input-field"
+                    placeholder="Ex. Delhi"
+                  />
+                </div>
+                <div>
+                  <label className="input-label">Zip Code / Pin Code</label>
+                  <input
+                    name="zip_code"
+                    value={zipCode}
+                    onChange={(e) => setZipCode(e.target.value)}
+                    required
+                    className="input-field"
+                    placeholder="Ex. 110001"
+                  />
+                </div>
+              </div>
+
+              {/* Map Picker & Search */}
+              <div className="pt-2 border-t border-primary/10">
+                <label className="input-label flex items-center gap-1 mb-3">
                   <MapPin className="w-3.5 h-3.5" />
-                  Pin Location on Map
+                  Search & Pin Location on Map
                 </label>
+                
+                {/* Geocoding Search Bar */}
+                <div className="flex gap-2 mb-4">
+                  <input
+                    type="text"
+                    placeholder="Type landmark, area or city (e.g. Connaught Place, Delhi)..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="input-field flex-1"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        handleSearchLocation();
+                      }
+                    }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSearchLocation}
+                    disabled={searching}
+                    className="btn btn-primary px-5 py-3 rounded-xl cursor-pointer text-sm font-bold flex items-center gap-1 shadow-md shrink-0"
+                  >
+                    {searching ? (
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                    ) : "Search & Pin"}
+                  </button>
+                </div>
+
                 <LocationPicker
+                  key={`${latitude}-${longitude}`} // Force re-render of map to center on new coordinates
                   defaultLat={latitude}
                   defaultLng={longitude}
-                  onLocationChange={(lat, lng) => {
-                    setLatitude(lat);
-                    setLongitude(lng);
-                  }}
+                  onLocationChange={handleLocationChange}
                 />
               </div>
             </div>

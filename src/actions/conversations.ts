@@ -153,7 +153,7 @@ export async function createBookingRequest(
   // Send system message
   await sendMessage(
     conversationId,
-    `📋 Booking Request: ${checkIn} → ${checkOut} (${totalNights} nights) — $${proposedPrice}${note ? `\nNote: ${note}` : ""}`,
+    `📋 Booking Request: ${checkIn} → ${checkOut} (${totalNights} nights) — ₹${proposedPrice}${note ? `\nNote: ${note}` : ""}`,
     "booking_request"
   );
 
@@ -293,6 +293,62 @@ export async function markMessagesAsRead(conversationId: string) {
     .eq("is_read", false);
 
   if (error) return { error: error.message };
+
+  revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath('/conversations');
+  return { success: true };
+}
+
+export async function cancelBookingRequest(bookingId: string, conversationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: booking, error: fetchError } = await supabase
+    .from("booking_requests")
+    .select("*")
+    .eq("id", bookingId)
+    .single();
+
+  if (fetchError || !booking) {
+    return { error: "Booking request not found." };
+  }
+
+  if (booking.tenant_id !== user.id) {
+    return { error: "You are not authorized to cancel this booking." };
+  }
+
+  // Booking check-in date rules: today < check-in day
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const checkInDate = new Date(booking.check_in);
+  checkInDate.setHours(0, 0, 0, 0);
+
+  if (today >= checkInDate) {
+    return { error: "You can only cancel a booking before the check-in day." };
+  }
+
+  const { error: updateError } = await supabase
+    .from("booking_requests")
+    .update({ status: "cancelled" })
+    .eq("id", bookingId);
+
+  if (updateError) return { error: updateError.message };
+
+  await supabase
+    .from("conversations")
+    .update({
+      status: "active",
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", conversationId);
+
+  await sendMessage(
+    conversationId,
+    `🚫 Booking request has been CANCELLED by the Renter.`,
+    "booking_cancelled"
+  );
 
   revalidatePath(`/conversations/${conversationId}`);
   revalidatePath('/conversations');

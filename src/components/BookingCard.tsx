@@ -1,8 +1,8 @@
 "use client";
 
 import { useTransition } from "react";
-import { CheckCircle, XCircle, Calendar, DollarSign, Moon, Clock } from "lucide-react";
-import { respondToBooking } from "@/actions/conversations";
+import { CheckCircle, XCircle, Calendar, IndianRupee, Moon, Clock } from "lucide-react";
+import { respondToBooking, cancelBookingRequest } from "@/actions/conversations";
 import type { BookingRequest } from "@/lib/types";
 
 interface BookingCardProps {
@@ -15,12 +15,29 @@ interface BookingCardProps {
 export default function BookingCard({ booking, conversationId, isLandlord, onResponded }: BookingCardProps) {
   const [isPending, startTransition] = useTransition();
 
-  function handleRespond(accept: boolean) {
+  async function handleRespond(accept: boolean) {
     startTransition(async () => {
       await respondToBooking(booking.id, conversationId, accept);
       onResponded?.();
     });
   }
+
+  function handleCancel() {
+    if (!confirm("Are you sure you want to cancel this booking?")) return;
+    startTransition(async () => {
+      await cancelBookingRequest(booking.id, conversationId);
+      onResponded?.();
+    });
+  }
+
+  // Can cancel if today is strictly before the check-in day
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const checkInDate = new Date(booking.check_in);
+  checkInDate.setHours(0, 0, 0, 0);
+
+  const canCancel = today < checkInDate && (booking.status === "accepted" || booking.status === "pending");
 
   const statusColors: Record<string, string> = {
     pending: "border-primary/20 bg-primary/5",
@@ -71,7 +88,7 @@ export default function BookingCard({ booking, conversationId, isLandlord, onRes
       <div className="flex items-center justify-between mb-6 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/20 shadow-ambient">
          <div className="text-sm font-bold text-outline tracking-widest uppercase">Proposed Rate</div>
          <div className="flex items-center gap-1.5 text-2xl font-black text-primary font-headline">
-           <DollarSign className="w-6 h-6" />
+           <IndianRupee className="w-6 h-6" />
            {booking.proposed_price}
          </div>
       </div>
@@ -106,6 +123,28 @@ export default function BookingCard({ booking, conversationId, isLandlord, onRes
               </>
             )}
           </button>
+        </div>
+      )}
+
+      {!isLandlord && canCancel && (
+        <div className="mt-6 border-t border-outline-variant/10 pt-6">
+          <button
+            onClick={handleCancel}
+            disabled={isPending}
+            className="w-full bg-[#EF4444] border-2 border-[#EF4444] text-white hover:bg-[#DC2626] active:scale-95 font-bold rounded-xl py-3.5 px-6 transition-all outline-none cursor-pointer flex justify-center items-center gap-2 shadow-md"
+          >
+            {isPending ? (
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              <>
+                <XCircle className="w-5 h-5" />
+                Cancel Booking
+              </>
+            )}
+          </button>
+          <p className="text-xs text-text-muted mt-2 text-center font-medium">
+            You can cancel this lease proposal until the check-in day ({new Date(booking.check_in).toLocaleDateString()}).
+          </p>
         </div>
       )}
     </div>

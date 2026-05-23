@@ -6,7 +6,7 @@ import {
   SlidersHorizontal,
   X,
   Bed,
-  DollarSign,
+  IndianRupee,
   Building,
   ArrowUpDown,
 } from "lucide-react";
@@ -151,7 +151,7 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 mb-8">
             <div>
               <label className="input-label flex items-center gap-2 text-primary">
-                <DollarSign className="w-4 h-4" />
+                <IndianRupee className="w-4 h-4" />
                 Min Price
               </label>
               <input
@@ -164,7 +164,7 @@ export default function SearchFilters({ onFilter, className = "" }: SearchFilter
             </div>
             <div>
               <label className="input-label flex items-center gap-2 text-primary">
-                <DollarSign className="w-4 h-4" />
+                <IndianRupee className="w-4 h-4" />
                 Max Price
               </label>
               <input

@@ -46,7 +46,7 @@ function createPinIcon(price: number) {
         cursor: pointer;
         transition: all 0.3s ease;
       ">
-        $${label}
+        ₹${label}
       </div>
     `,
     iconSize: [50, 24],
