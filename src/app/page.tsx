@@ -35,7 +35,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <div className="bg-surface">
+    <div className="bg-transparent">
       {/* ================== HERO SECTION ================== */}
       <section className="relative px-8 py-12 md:py-24 max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[90vh]">
         <div className="lg:col-span-6 space-y-8 animate-fade-in-up">

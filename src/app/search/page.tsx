@@ -53,7 +53,7 @@ export default function SearchPage() {
   );
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-transparent">
       {/* Header */}
       <div className="bg-surface-container-low pt-28 pb-16 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
