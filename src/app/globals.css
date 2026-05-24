@@ -108,6 +108,8 @@ body {
   color: var(--color-on-surface);
   background: var(--color-surface);
   line-height: 1.6;
+  background-image: radial-gradient(rgba(0, 110, 26, 0.04) 1.5px, transparent 1.5px);
+  background-size: 32px 32px;
 }
 
 h1, h2, h3, h4, h5, h6 {

@@ -35,7 +35,12 @@ export default async function RootLayout({
           crossOrigin="anonymous"
         />
       </head>
-      <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container">
+      <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container relative overflow-x-hidden">
+        {/* Universal Ambient Animated Background Blobs */}
+        <div className="fixed -z-10 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] top-[-10%] left-[-10%] animate-float pointer-events-none"></div>
+        <div className="fixed -z-10 w-[450px] h-[450px] bg-tertiary/5 rounded-full blur-[100px] top-[30%] right-[-10%] animate-float-delayed pointer-events-none"></div>
+        <div className="fixed -z-10 w-[400px] h-[400px] bg-secondary/10 rounded-full blur-[90px] bottom-[-10%] left-[20%] animate-float pointer-events-none"></div>
+        <div className="fixed -z-10 w-[350px] h-[350px] bg-primary/5 rounded-full blur-[80px] bottom-[20%] right-[10%] animate-float-delayed pointer-events-none"></div>
         <RouteLoader />
         <Navbar initialProfile={profile} unreadCount={unreadCount} />
         <main className="flex-1 pt-[72px]">
