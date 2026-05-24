@@ -347,7 +347,7 @@ export async function cancelBookingRequest(bookingId: string, conversationId: st
   await sendMessage(
     conversationId,
     `🚫 Booking request has been CANCELLED by the Renter.`,
-    "booking_cancelled"
+    "system"
   );
 
   revalidatePath(`/conversations/${conversationId}`);
