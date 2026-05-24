@@ -52,7 +52,7 @@ export default async function ConversationPage({ params }: ConversationPageProps
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background">
+    <div className="h-[calc(100vh-72px)] flex flex-col bg-background overflow-hidden">
       {/* Header */}
       <div className="bg-surface/80 backdrop-blur-md border-b border-outline-variant/20 pt-20 pb-4 px-4 sm:px-8 sticky top-0 z-40">
         <div className="max-w-[1440px] mx-auto">
@@ -107,24 +107,24 @@ export default async function ConversationPage({ params }: ConversationPageProps
       </div>
 
       {/* Content */}
-      <div className="flex-1 flex max-w-[1440px] mx-auto w-full relative z-10">
+      <div className="flex-1 flex max-w-[1440px] mx-auto w-full relative z-10 min-h-0">
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col relative h-[calc(100vh-160px)]">
+        <div className="flex-1 flex flex-col relative min-h-0">
           
           {/* Mobile Interactions Dropdown */}
-          <div className="lg:hidden p-4 bg-surface-container-lowest border-b border-outline-variant/20 z-20">
+          <div className="lg:hidden p-4 bg-surface-container-lowest border-b border-outline-variant/20 z-20 shrink-0">
             <details className="group">
               <summary className="font-bold text-primary font-headline uppercase tracking-widest flex justify-between items-center cursor-pointer list-none py-3 px-6 bg-primary/10 hover:bg-primary/20 transition-colors rounded-[1.5rem] shadow-sm border border-primary/20">
                  <span>Manage Lease & Options</span>
                  <span className="transition duration-300 group-open:rotate-180">▼</span>
               </summary>
-              <div className="mt-4 p-6 border border-outline-variant/20 rounded-[2rem] bg-surface-container-lowest shadow-ambient max-h-[50vh] overflow-y-auto overscroll-contain">
+              <div className="mt-4 p-6 border border-outline-variant/20 rounded-[2rem] bg-surface-container-lowest shadow-ambient max-h-[40vh] overflow-y-auto overscroll-contain">
                  {sidebarContent}
               </div>
             </details>
           </div>
 
-          <div className="flex-1 overflow-y-auto no-scrollbar">
+          <div className="flex-1 flex flex-col min-h-0">
             <ChatThread
               conversationId={id}
               currentUserId={user.id}
@@ -137,7 +137,7 @@ export default async function ConversationPage({ params }: ConversationPageProps
         </div>
 
         {/* Desktop Sidebar */}
-        <div className="hidden lg:block w-[400px] border-l border-outline-variant/20 p-8 overflow-y-auto shadow-inner bg-surface-container-lowest h-[calc(100vh-160px)] no-scrollbar">
+        <div className="hidden lg:block w-[400px] border-l border-outline-variant/20 p-8 overflow-y-auto shadow-inner bg-surface-container-lowest h-full no-scrollbar">
            {sidebarContent}
         </div>
       </div>
