@@ -8,6 +8,8 @@ import {
   CheckCircle,
   Info,
   ChevronRight,
+  Star,
+  MessageSquare,
 } from "lucide-react";
 import { getProperty } from "@/actions/properties";
 import { getUserFavoriteIds } from "@/actions/favorites";
@@ -17,6 +19,9 @@ import FavoriteButton from "@/components/FavoriteButton";
 import InquiryForm from "@/components/InquiryForm";
 import MapView from "@/components/MapView";
 import DynamicBackButton from "@/components/DynamicBackButton";
+import { getReviewsForProperty } from "@/actions/reviews";
+import ReviewForm from "@/components/ReviewForm";
+
 
 interface PropertyPageProps {
   params: Promise<{ id: string }>;
@@ -24,15 +29,24 @@ interface PropertyPageProps {
 
 export default async function PropertyPage({ params }: PropertyPageProps) {
   const { id } = await params;
-  const [property, user] = await Promise.all([
+  const [property, user, reviews] = await Promise.all([
     getProperty(id),
     getUser(),
+    getReviewsForProperty(id),
   ]);
 
   if (!property) notFound();
 
   const favoriteIds = await getUserFavoriteIds();
   const isFavorited = favoriteIds.includes(property.id);
+
+  const totalReviews = reviews.length;
+  const averageRating = totalReviews > 0
+    ? (reviews.reduce((acc, r) => acc + r.rating, 0) / totalReviews).toFixed(1)
+    : null;
+
+  const hasReviewed = user ? reviews.some((r) => r.user_id === user.id) : false;
+
 
   return (
     <div className="min-h-[calc(100vh-72px)] bg-background relative pb-24 overflow-hidden">
@@ -118,10 +132,21 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
             <div className="animate-fade-in-up">
               <div className="flex flex-wrap items-center justify-between gap-6 mb-6">
                  <div>
-                    <div className="flex items-center gap-3 mb-4">
+                    <div className="flex flex-wrap items-center gap-3 mb-4">
                        <span className="bg-primary/90 backdrop-blur text-white px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-[0.2em]">
                          {property.property_type}
                        </span>
+                       {averageRating ? (
+                         <span className="bg-amber-100 text-amber-800 border border-amber-200 px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+                           <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
+                           {averageRating} ({totalReviews} {totalReviews === 1 ? "Review" : "Reviews"})
+                         </span>
+                       ) : (
+                         <span className="bg-surface-container-high text-outline px-3 py-1.5 rounded-full text-xs font-bold flex items-center gap-1">
+                           <Star className="w-3.5 h-3.5 text-outline fill-none" />
+                           New Listing
+                         </span>
+                       )}
                        <span className="flex items-center gap-1.5 text-on-surface-variant font-bold text-sm">
                          <MapPin className="w-4 h-4 text-primary" />
                          {property.city}, {property.state} {property.zip_code}
@@ -231,6 +256,74 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 </a>
               </div>
             )}
+
+            {/* Reviews Section */}
+            <section className="space-y-8 mt-12 animate-fade-in-up delay-[450ms]">
+              <h2 className="text-2xl font-black font-headline text-on-surface mb-6 border-b border-outline-variant/30 pb-4 flex items-center gap-2">
+                <MessageSquare className="text-primary w-6 h-6"/> Client Reviews & Ratings
+              </h2>
+
+              {reviews.length === 0 ? (
+                <div className="glass-card p-8 rounded-3xl text-center">
+                  <p className="text-on-surface-variant italic font-body">No reviews have been written for this property yet.</p>
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  {reviews.map((review: any) => (
+                    <div key={review.id} className="glass-card p-6 sm:p-8 rounded-[2rem] space-y-4">
+                      <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 rounded-full bg-surface-container-low border border-primary/20 flex items-center justify-center shrink-0 overflow-hidden text-lg font-black text-primary font-headline shadow-inner">
+                            {review.author?.avatar_url ? (
+                              <img src={review.author.avatar_url} alt={review.author.full_name} className="w-full h-full object-cover"/>
+                            ) : (
+                              review.author?.full_name?.split(" ").map((n: string) => n[0]).join("").toUpperCase() || "C"
+                            )}
+                          </div>
+                          <div>
+                            <div className="font-bold text-on-surface leading-tight">
+                              {review.author?.full_name || "NestScout Client"}
+                            </div>
+                            <div className="text-[10px] text-outline uppercase tracking-wider font-semibold">
+                              {new Date(review.created_at).toLocaleDateString("en-IN", {
+                                year: "numeric",
+                                month: "long",
+                                day: "numeric",
+                              })}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Stars */}
+                        <div className="flex items-center gap-0.5">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <Star
+                              key={star}
+                              className={`w-4 h-4 ${
+                                review.rating >= star
+                                  ? "fill-primary text-primary"
+                                  : "text-outline-variant fill-none"
+                              }`}
+                            />
+                          ))}
+                        </div>
+                      </div>
+
+                      <p className="text-on-surface-variant font-light leading-relaxed whitespace-pre-wrap">
+                        {review.comment}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Submit Review Form */}
+              {user && user.id !== property.provider_id && !hasReviewed && (
+                <div className="mt-8">
+                  <ReviewForm propertyId={property.id} />
+                </div>
+              )}
+            </section>
           </div>
 
           {/* Sidebar Area */}
