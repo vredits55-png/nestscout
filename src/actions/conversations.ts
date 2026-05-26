@@ -23,8 +23,41 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
   if (selectError) return { error: selectError.message };
 
   if (existing) {
-    // If the conversation was previously deleted or had deletion requested, restore it
-    if (existing.deletion_status !== "none" || existing.deletion_requested_by !== null) {
+    // If the conversation was mutually deleted, reset messages and booking requests to start fresh
+    if (existing.deletion_status === "deleted") {
+      const { error: deleteMessagesError } = await supabase
+        .from("messages")
+        .delete()
+        .eq("conversation_id", existing.id);
+
+      if (deleteMessagesError) return { error: deleteMessagesError.message };
+
+      const { error: deleteBookingsError } = await supabase
+        .from("booking_requests")
+        .delete()
+        .eq("conversation_id", existing.id);
+
+      if (deleteBookingsError) return { error: deleteBookingsError.message };
+
+      const { data: restored, error: updateError } = await supabase
+        .from("conversations")
+        .update({
+          deletion_status: "none",
+          deletion_requested_by: null,
+          status: "active",
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (updateError) return { error: updateError.message };
+      revalidatePath(`/conversations/${existing.id}`);
+      return { conversation: restored };
+    }
+
+    // If it was just requested deletion (one-sided) but not finalized, restore without clearing history
+    if (existing.deletion_status === "requested" || existing.deletion_requested_by !== null) {
       const { data: restored, error: updateError } = await supabase
         .from("conversations")
         .update({
@@ -40,6 +73,7 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
       revalidatePath(`/conversations/${existing.id}`);
       return { conversation: restored };
     }
+
     return { conversation: existing };
   }
 
