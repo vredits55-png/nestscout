@@ -153,7 +153,14 @@ export default function LoginPage() {
       <div className="absolute bottom-1/4 left-10 w-80 h-80 rounded-full bg-accent/20 blur-3xl animate-float delay-300 mix-blend-multiply" />
 
       <div className="w-full max-w-md relative z-10">
-        <div className="flex justify-end mb-3 animate-fade-in-up">
+        <div className="flex justify-between items-center mb-3 animate-fade-in-up">
+          <Link
+            href="/"
+            className="text-xs font-bold px-4 py-2 rounded-full border border-primary/20 bg-white/40 hover:bg-white hover:border-primary/50 text-primary transition-all shadow-md backdrop-blur-md flex items-center gap-1"
+          >
+            <ChevronLeft className="w-3.5 h-3.5" />
+            Return to Home
+          </Link>
           <Link
             href="/register"
             className="text-xs font-bold px-4 py-2 rounded-full border border-primary/20 bg-white/40 hover:bg-white hover:border-primary/50 text-primary transition-all shadow-md backdrop-blur-md"
@@ -164,9 +171,9 @@ export default function LoginPage() {
 
         <div className="glass rounded-3xl p-8 animate-fade-in-up shadow-2xl border border-white/20">
           <div className="text-center mb-6">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center mx-auto mb-4 shadow-glow">
+            <Link href="/" className="w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-primary-light flex items-center justify-center mx-auto mb-4 shadow-glow transition-transform hover:scale-105">
               <img src="/logo.png" alt="NestScout" className="w-12 h-12 object-contain" />
-            </div>
+            </Link>
             <h1 className="text-3xl font-bold text-text mb-2 tracking-tight">
               Welcome back
             </h1>

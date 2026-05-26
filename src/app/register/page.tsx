@@ -46,9 +46,9 @@ function RegisterContent() {
         
         <div className="glass rounded-3xl p-8 sm:p-10 animate-fade-in-up">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mx-auto mb-4 shadow-glow">
+            <Link href="/" className="w-16 h-16 rounded-2xl bg-gradient-to-br from-accent to-primary flex items-center justify-center mx-auto mb-4 shadow-glow transition-transform hover:scale-105">
               <img src="/logo.png" alt="NestScout" className="w-12 h-12 object-contain" />
-            </div>
+            </Link>
             <h1 className="text-3xl font-bold text-text mb-2 tracking-tight">
               Create Account
             </h1>
