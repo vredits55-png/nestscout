@@ -95,6 +95,15 @@ export async function GET(request: Request) {
             !isEquivalent(profileProvider, sessionProvider) &&
             !isSessionProviderLinked
           ) {
+            // Immediately unlink this identity from the existing account to keep them separate
+            const actualSessionProvider = sessionProvider === "twitter" ? "x" : sessionProvider;
+            const linkedIdentity = user.identities?.find(
+              (id) => id.provider === actualSessionProvider || id.provider === sessionProvider
+            );
+            if (linkedIdentity) {
+              await supabase.auth.unlinkIdentity(linkedIdentity);
+            }
+
             await supabase.auth.signOut();
             return NextResponse.redirect(
               `${origin}/login?error=This email is already registered using ${profileProvider === 'email' ? 'Password' : profileProvider}. Please sign in using that method.`
