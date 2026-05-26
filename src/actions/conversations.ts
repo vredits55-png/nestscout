@@ -23,39 +23,6 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
   if (selectError) return { error: selectError.message };
 
   if (existing) {
-    // If the conversation was mutually deleted, reset messages and booking requests to start fresh
-    if (existing.deletion_status === "deleted") {
-      const { error: deleteMessagesError } = await supabase
-        .from("messages")
-        .delete()
-        .eq("conversation_id", existing.id);
-
-      if (deleteMessagesError) return { error: deleteMessagesError.message };
-
-      const { error: deleteBookingsError } = await supabase
-        .from("booking_requests")
-        .delete()
-        .eq("conversation_id", existing.id);
-
-      if (deleteBookingsError) return { error: deleteBookingsError.message };
-
-      const { data: restored, error: updateError } = await supabase
-        .from("conversations")
-        .update({
-          deletion_status: "none",
-          deletion_requested_by: null,
-          status: "active",
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", existing.id)
-        .select()
-        .single();
-
-      if (updateError) return { error: updateError.message };
-      revalidatePath(`/conversations/${existing.id}`);
-      return { conversation: restored };
-    }
-
     // If it was just requested deletion (one-sided) but not finalized, restore without clearing history
     if (existing.deletion_status === "requested" || existing.deletion_requested_by !== null) {
       const { data: restored, error: updateError } = await supabase
@@ -128,7 +95,6 @@ export async function getConversations() {
     .from("conversations")
     .select("*, property:properties(id, title, images, city, price_per_month), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
     .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`)
-    .neq('deletion_status', 'deleted')
     .order("updated_at", { ascending: false });
 
   // Fetch the latest message for each conversation
@@ -282,7 +248,6 @@ export async function getUnreadConversationCount() {
         .from("conversations")
         .select("id")
         .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`)
-        .neq("deletion_status", "deleted")
       ).data?.map((c: { id: string }) => c.id) || []
     );
 
@@ -325,10 +290,7 @@ export async function confirmConversationDeletion(conversationId: string) {
 
   const { error } = await supabase
     .from("conversations")
-    .update({ 
-      deletion_status: 'deleted',
-      updated_at: new Date().toISOString()
-    })
+    .delete()
     .eq("id", conversationId)
     .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`);
 

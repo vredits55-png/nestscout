@@ -17,7 +17,7 @@ interface ConversationSidebarProps {
   isTenant: boolean;
   isLandlord: boolean;
   currentUserId: string;
-  initialDeletionStatus: "none" | "requested" | "deleted";
+  initialDeletionStatus: "none" | "requested";
   initialDeletionRequestedBy: string | null;
 }
 
@@ -104,24 +104,24 @@ export default function ConversationSidebar({
           setConversationStatus("booking_requested");
         }
       )
-      // 3. Listen to conversations updates (for deletion status / conversation status changes)
+      // 3. Listen to conversations updates and deletion (for status / deletion_status / physical deletes)
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "conversations",
           filter: `id=eq.${conversationId}`,
         },
         (payload) => {
+          if (payload.eventType === "DELETE") {
+            router.push("/conversations");
+            return;
+          }
           const updatedConv = payload.new as Conversation;
           setConversationStatus(updatedConv.status);
           setDeletionStatus(updatedConv.deletion_status || "none");
           setDeletionRequestedBy(updatedConv.deletion_requested_by || null);
-
-          if (updatedConv.deletion_status === "deleted") {
-            router.push("/conversations");
-          }
         }
       )
       .subscribe();

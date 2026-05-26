@@ -100,14 +100,13 @@ export default function ChatThread({
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "conversations",
           filter: `id=eq.${conversationId}`,
         },
         (payload) => {
-          const updatedConv = payload.new as Conversation;
-          if (updatedConv && updatedConv.deletion_status === "deleted") {
+          if (payload.eventType === "DELETE") {
             router.push("/conversations");
           }
         }

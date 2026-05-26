@@ -46,8 +46,7 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
       const { data: convs } = await supabase
         .from("conversations")
         .select("id")
-        .or(`tenant_id.eq.${profile.id},landlord_id.eq.${profile.id}`)
-        .neq("deletion_status", "deleted");
+        .or(`tenant_id.eq.${profile.id},landlord_id.eq.${profile.id}`);
 
       if (!convs || convs.length === 0) {
         setUnread(0);

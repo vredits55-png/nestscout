@@ -17,3 +17,10 @@ create policy "Tenants can delete booking requests"
   on public.booking_requests for delete using (
     auth.uid() = tenant_id
   );
+
+drop policy if exists "Participants can delete their conversations" on public.conversations;
+create policy "Participants can delete their conversations"
+  on public.conversations for delete using (
+    auth.uid() = tenant_id or auth.uid() = landlord_id
+  );
+

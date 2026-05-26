@@ -47,11 +47,6 @@ export default function ConversationsList({ initialConversations, currentUserId 
       };
 
       setConversations((prev) => {
-        // If deleted, remove it
-        if (fullConv.deletion_status === "deleted") {
-          return prev.filter((c) => c.id !== conversationId);
-        }
-
         const filtered = prev.filter((c) => c.id !== conversationId);
         // Put updated conversation at the beginning (since it was just updated)
         return [fullConv, ...filtered];
@@ -72,8 +67,8 @@ export default function ConversationsList({ initialConversations, currentUserId 
           const record = (payload.new || payload.old) as Conversation;
           if (!record || !record.id) return;
 
-          // If deletion_status is deleted, remove it instantly
-          if (payload.eventType === "UPDATE" && record.deletion_status === "deleted") {
+          // If conversation was deleted physically, remove it instantly from the UI state
+          if (payload.eventType === "DELETE") {
             setConversations((prev) => prev.filter((c) => c.id !== record.id));
           } else {
             // Otherwise refetch to get joined values (property, tenant, landlord details)

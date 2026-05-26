@@ -36,7 +36,6 @@ export async function getReceivedInquiries() {
     .from("conversations")
     .select("*, property:properties(*), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
     .eq("landlord_id", user.id)
-    .neq("deletion_status", "deleted")
     .order("updated_at", { ascending: false });
 
   if (!convs) return [];
@@ -92,8 +91,7 @@ export async function getUnreadCount() {
   const { data: convs } = await supabase
     .from("conversations")
     .select("id")
-    .eq("landlord_id", user.id)
-    .neq("deletion_status", "deleted");
+    .eq("landlord_id", user.id);
 
   if (!convs || convs.length === 0) return 0;
 

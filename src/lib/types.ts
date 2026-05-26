@@ -89,7 +89,7 @@ export interface Conversation {
   messages?: Message[];
   latest_message?: Message;
   deletion_requested_by?: string | null;
-  deletion_status?: 'none' | 'requested' | 'deleted';
+  deletion_status?: 'none' | 'requested';
 }
 
 export interface Message {

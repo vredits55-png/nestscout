@@ -21,10 +21,6 @@ export default async function ConversationPage({ params }: ConversationPageProps
   const conversation = await getConversation(id);
   if (!conversation) notFound();
 
-  if (conversation.deletion_status === "deleted") {
-    redirect("/conversations");
-  }
-
   if (conversation.landlord_id === conversation.tenant_id) {
     redirect("/conversations");
   }
