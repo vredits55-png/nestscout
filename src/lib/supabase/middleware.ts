@@ -46,8 +46,14 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/login") || pathname.startsWith("/register");
   const isSelectRolePage = pathname === "/select-role";
 
-  // If NOT logged in and NOT on an auth page, redirect to login
-  if (!user && !isAuthPage) {
+  // Define protected path prefixes
+  const protectedPrefixes = ["/conversations", "/favorites", "/profile", "/provider", "/select-role"];
+  const isProtectedPage = protectedPrefixes.some(
+    (prefix) => pathname === prefix || pathname.startsWith(prefix + "/")
+  );
+
+  // If NOT logged in and trying to access a protected page, redirect to login
+  if (!user && isProtectedPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
     return NextResponse.redirect(url);
@@ -61,7 +67,8 @@ export async function updateSession(request: NextRequest) {
       .eq("id", user.id)
       .single();
 
-    const role = profile?.role;
+    // Treat missing profile or missing role as undecided onboarding
+    const role = profile?.role ?? "undecided";
     const profileProvider = profile?.provider;
     const linkedProviders = profile?.linked_providers || [];
     const sessionProvider = getSessionProvider(session);

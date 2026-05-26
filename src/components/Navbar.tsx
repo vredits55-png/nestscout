@@ -104,8 +104,17 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
     const supabase = createClient();
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session?.user) {
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (session?.user) {
+        const { data: prof } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
+        if (prof) {
+          setProfile(prof);
+        }
+      } else {
         setProfile(null);
       }
     });

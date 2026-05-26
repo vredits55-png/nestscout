@@ -345,19 +345,31 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                  {/* Interaction Engine */}
                  <div className="w-full relative z-10 mt-6">
                    <div className="bg-transparent text-white">
-                     {user?.id === property.provider_id ? (
-                       <div className="p-6 rounded-2xl bg-white/10 border border-white/20 text-center">
-                         <p className="text-sm font-semibold text-amber-200">
-                           This is your listing. You cannot inquire about or request bookings on your own properties.
-                         </p>
-                       </div>
-                     ) : (
-                       <InquiryForm
-                          propertyId={property.id}
-                          receiverId={property.provider_id}
-                          propertyTitle={property.title}
-                       />
-                     )}
+                      {!user ? (
+                        <div className="p-6 rounded-2xl bg-white/10 border border-white/20 text-center space-y-4">
+                          <p className="text-sm font-semibold text-amber-200">
+                            Sign in to inquire or request a booking for this property.
+                          </p>
+                          <Link
+                            href="/login"
+                            className="btn btn-primary w-full text-center py-3"
+                          >
+                            Sign In
+                          </Link>
+                        </div>
+                      ) : user.id === property.provider_id ? (
+                        <div className="p-6 rounded-2xl bg-white/10 border border-white/20 text-center">
+                          <p className="text-sm font-semibold text-amber-200">
+                            This is your listing. You cannot inquire about or request bookings on your own properties.
+                          </p>
+                        </div>
+                      ) : (
+                        <InquiryForm
+                           propertyId={property.id}
+                           receiverId={property.provider_id}
+                           propertyTitle={property.title}
+                        />
+                      )}
                    </div>
                  </div>
 
