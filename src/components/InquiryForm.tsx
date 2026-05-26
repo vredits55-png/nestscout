@@ -29,13 +29,13 @@ export default function InquiryForm({
     startTransition(async () => {
       // Create or get existing conversation
       const result = await getOrCreateConversation(propertyId, receiverId);
-      if (result?.error) {
-        setError(result.error);
+      if (result?.error || !result?.conversation) {
+        setError(result?.error || "Failed to establish conversation thread.");
         return;
       }
 
       // Send the message in the conversation thread
-      const msgResult = await sendMessage(result.conversation!.id, message);
+      const msgResult = await sendMessage(result.conversation.id, message);
       if (msgResult?.error) {
         setError(msgResult.error);
         return;

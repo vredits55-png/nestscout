@@ -12,15 +12,36 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
     return { error: "You cannot inquire about or rent your own property." };
   }
 
-  // Check if conversation exists
-  const { data: existing } = await supabase
+  // Check if conversation exists using maybeSingle to avoid query errors
+  const { data: existing, error: selectError } = await supabase
     .from("conversations")
     .select("*")
     .eq("property_id", propertyId)
     .eq("tenant_id", user.id)
-    .single();
+    .maybeSingle();
 
-  if (existing) return { conversation: existing };
+  if (selectError) return { error: selectError.message };
+
+  if (existing) {
+    // If the conversation was previously deleted or had deletion requested, restore it
+    if (existing.deletion_status !== "none" || existing.deletion_requested_by !== null) {
+      const { data: restored, error: updateError } = await supabase
+        .from("conversations")
+        .update({
+          deletion_status: "none",
+          deletion_requested_by: null,
+          updated_at: new Date().toISOString()
+        })
+        .eq("id", existing.id)
+        .select()
+        .single();
+
+      if (updateError) return { error: updateError.message };
+      revalidatePath(`/conversations/${existing.id}`);
+      return { conversation: restored };
+    }
+    return { conversation: existing };
+  }
 
   // Create new conversation
   const { data, error } = await supabase
@@ -29,11 +50,15 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
       property_id: propertyId,
       tenant_id: user.id,
       landlord_id: landlordId,
+      deletion_status: "none",
+      deletion_requested_by: null
     })
     .select()
     .single();
 
   if (error) return { error: error.message };
+  
+  revalidatePath("/conversations");
   return { conversation: data };
 }
 
