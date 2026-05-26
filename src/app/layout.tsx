@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
+import SystemNotificationManager from "@/components/SystemNotificationManager";
 
 import { getUser } from "@/actions/auth";
 import { getUnreadConversationCount } from "@/actions/conversations";
@@ -43,6 +44,7 @@ export default async function RootLayout({
         <div className="fixed -z-10 w-[350px] h-[350px] bg-primary/5 rounded-full blur-[80px] bottom-[20%] right-[10%] animate-float-delayed pointer-events-none"></div>
         <RouteLoader />
         <Navbar initialProfile={profile} unreadCount={unreadCount} />
+        <SystemNotificationManager profile={profile} />
         <main className="flex-1 pt-[72px]">
           <MotionProvider>{children}</MotionProvider>
         </main>

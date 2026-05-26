@@ -117,6 +117,19 @@ export interface BookingRequest {
   created_at: string;
 }
 
+export interface Notification {
+  id: string;
+  user_id: string;
+  sender_id: string;
+  type: "enquiry" | "booking_request" | "deletion_request";
+  title: string;
+  message: string;
+  link: string;
+  is_read: boolean;
+  created_at: string;
+  sender?: Profile;
+}
+
 export interface Review {
   id: string;
   property_id: string;

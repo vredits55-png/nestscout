@@ -37,6 +37,34 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
         .single();
 
       if (updateError) return { error: updateError.message };
+
+      // Create Enquiry Notification on restore
+      try {
+        const { data: tenantProfile } = await supabase
+          .from("profiles")
+          .select("full_name")
+          .eq("id", user.id)
+          .single();
+
+        const { data: prop } = await supabase
+          .from("properties")
+          .select("title")
+          .eq("id", propertyId)
+          .single();
+
+        await supabase.from("notifications").insert({
+          user_id: landlordId,
+          sender_id: user.id,
+          type: "enquiry",
+          title: "New Rent Enquiry",
+          message: `${tenantProfile?.full_name || "A renter"} sent an enquiry for "${prop?.title || "your property"}".`,
+          link: `/conversations/${existing.id}`,
+          is_read: false,
+        });
+      } catch (err) {
+        console.error("Failed to create enquiry notification on restore:", err);
+      }
+
       revalidatePath(`/conversations/${existing.id}`);
       return { conversation: restored };
     }
@@ -58,6 +86,33 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
     .single();
 
   if (error) return { error: error.message };
+
+  // Create Enquiry Notification
+  try {
+    const { data: tenantProfile } = await supabase
+      .from("profiles")
+      .select("full_name")
+      .eq("id", user.id)
+      .single();
+
+    const { data: prop } = await supabase
+      .from("properties")
+      .select("title")
+      .eq("id", propertyId)
+      .single();
+
+    await supabase.from("notifications").insert({
+      user_id: landlordId,
+      sender_id: user.id,
+      type: "enquiry",
+      title: "New Rent Enquiry",
+      message: `${tenantProfile?.full_name || "A renter"} sent an enquiry for "${prop?.title || "your property"}".`,
+      link: `/conversations/${data.id}`,
+      is_read: false,
+    });
+  } catch (err) {
+    console.error("Failed to create enquiry notification:", err);
+  }
   
   revalidatePath("/conversations");
   return { conversation: data };
@@ -182,6 +237,35 @@ export async function createBookingRequest(
     "booking_request"
   );
 
+  // Create booking request notification
+  try {
+    const { data: conv } = await supabase
+      .from("conversations")
+      .select("landlord_id, property:properties(title)")
+      .eq("id", conversationId)
+      .single();
+
+    if (conv) {
+      const { data: tenantProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      await supabase.from("notifications").insert({
+        user_id: conv.landlord_id,
+        sender_id: user.id,
+        type: "booking_request",
+        title: "New Booking Request",
+        message: `${tenantProfile?.full_name || "A renter"} requested to book "${(conv.property as any)?.title || "your property"}".`,
+        link: `/conversations/${conversationId}`,
+        is_read: false,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to create booking request notification:", err);
+  }
+
   revalidatePath(`/conversations/${conversationId}`);
   return { booking: data };
 }
@@ -277,6 +361,36 @@ export async function requestConversationDeletion(conversationId: string) {
     "🗑️ The other party has requested to delete this conversation. Do you agree?",
     "system"
   );
+
+  // Create deletion request notification
+  try {
+    const { data: conv } = await supabase
+      .from("conversations")
+      .select("tenant_id, landlord_id, property:properties(title)")
+      .eq("id", conversationId)
+      .single();
+
+    if (conv) {
+      const recipientId = user.id === conv.tenant_id ? conv.landlord_id : conv.tenant_id;
+      const { data: senderProfile } = await supabase
+        .from("profiles")
+        .select("full_name")
+        .eq("id", user.id)
+        .single();
+
+      await supabase.from("notifications").insert({
+        user_id: recipientId,
+        sender_id: user.id,
+        type: "deletion_request",
+        title: "Conversation Deletion Requested",
+        message: `${senderProfile?.full_name || "The other party"} requested to delete the conversation for "${(conv.property as any)?.title || "property"}".`,
+        link: `/conversations/${conversationId}`,
+        is_read: false,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to create deletion request notification:", err);
+  }
 
   revalidatePath(`/conversations/${conversationId}`);
   revalidatePath('/conversations');

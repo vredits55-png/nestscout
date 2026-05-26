@@ -16,7 +16,6 @@ import {
   User,
 } from "lucide-react";
 import type { Profile } from "@/lib/types";
-
 import { usePathname } from "next/navigation";
 
 export default function Navbar({ initialProfile, unreadCount = 0 }: { initialProfile?: Profile | null, unreadCount?: number }) {
