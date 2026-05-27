@@ -431,6 +431,34 @@ export async function confirmConversationDeletion(conversationId: string) {
   return { success: true, redirect: true };
 }
 
+export async function cancelConversationDeletion(conversationId: string) {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("conversations")
+    .update({
+      deletion_status: "none",
+      deletion_requested_by: null,
+      updated_at: new Date().toISOString()
+    })
+    .eq("id", conversationId)
+    .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`);
+
+  if (error) return { error: error.message };
+
+  await sendMessage(
+    conversationId,
+    "🔄 The deletion request has been cancelled/declined.",
+    "system"
+  );
+
+  revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath('/conversations');
+  return { success: true };
+}
+
 export async function markMessagesAsRead(conversationId: string) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
