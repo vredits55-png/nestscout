@@ -133,7 +133,7 @@ export default function ConversationSidebar({
   return (
     <div className="space-y-6">
       {/* Booking Request Button (Tenant only) */}
-      {isTenant && conversationStatus !== "confirmed" && (
+      {isTenant && conversationStatus !== "confirmed" && conversationStatus !== "booking_requested" && (
         <BookingRequestForm
           conversationId={conversationId}
           propertyId={propertyId}
