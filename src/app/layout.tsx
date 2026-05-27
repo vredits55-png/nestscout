@@ -1,13 +1,26 @@
 import type { Metadata } from "next";
 import { cookies } from "next/headers";
+import { Plus_Jakarta_Sans, Manrope } from "next/font/google";
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import SystemNotificationManager from "@/components/SystemNotificationManager";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-
 import { getUser } from "@/actions/auth";
 import RouteLoader from "@/components/RouteLoader";
 import MotionProvider from "@/components/MotionProvider";
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  variable: "--font-plus-jakarta-sans",
+  display: "swap",
+});
+
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "NestScout — Curated Editorial Real Estate",
@@ -41,15 +54,17 @@ export default async function RootLayout({
   const unreadCount = 0;
 
   return (
-    <html lang="en" className="min-h-screen antialiased">
-      <head>
-        <script
-          async
+    <html
+      lang="en"
+      className={`${plusJakartaSans.variable} ${manrope.variable} min-h-screen antialiased`}
+    >
+      <head />
+      <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container relative overflow-x-hidden">
+        <Script
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6213864135630742"
+          strategy="lazyOnload"
           crossOrigin="anonymous"
         />
-      </head>
-      <body className="min-h-screen flex flex-col bg-surface text-on-surface font-body selection:bg-primary-fixed selection:text-on-primary-container relative overflow-x-hidden">
         {/* Universal Ambient Animated Background Blobs */}
         <div className="fixed -z-10 w-[500px] h-[500px] bg-primary/10 rounded-full blur-[120px] top-[-10%] left-[-10%] animate-float pointer-events-none"></div>
         <div className="fixed -z-10 w-[450px] h-[450px] bg-tertiary/5 rounded-full blur-[100px] top-[30%] right-[-10%] animate-float-delayed pointer-events-none"></div>
