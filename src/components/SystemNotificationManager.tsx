@@ -17,14 +17,21 @@ export default function SystemNotificationManager({
   useEffect(() => {
     if (!profile) return;
 
-    // 1. Request native notification permissions
+    // 1. Register Service Worker for mobile notification support
+    if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").catch((err) => {
+        console.error("Service worker registration failed:", err);
+      });
+    }
+
+    // 2. Request native notification permissions (fallback/check)
     if (typeof window !== "undefined" && "Notification" in window) {
       if (Notification.permission === "default") {
         Notification.requestPermission();
       }
     }
 
-    // 2. Subscribe to real-time notification inserts in the database
+    // 3. Subscribe to real-time notification inserts in the database
     const supabase = createClient();
     const channel = supabase
       .channel(`system-notifications-${profile.id}`)
@@ -39,23 +46,35 @@ export default function SystemNotificationManager({
         (payload) => {
           const newNotif = payload.new as Notification;
 
-          // 3. Trigger native OS system notification
+          // 4. Trigger native OS system notification
           if (
             typeof window !== "undefined" &&
             "Notification" in window &&
             Notification.permission === "granted"
           ) {
-            const systemNotif = new Notification(newNotif.title, {
-              body: newNotif.message,
-              icon: "/logo.png",
-              tag: newNotif.id,
-            });
+            if (navigator.serviceWorker && navigator.serviceWorker.ready) {
+              navigator.serviceWorker.ready.then((registration) => {
+                registration.showNotification(newNotif.title, {
+                  body: newNotif.message,
+                  icon: "/logo.png",
+                  tag: newNotif.id,
+                  data: { link: newNotif.link }
+                });
+              });
+            } else {
+              // Fallback to classic desktop Notification
+              const systemNotif = new Notification(newNotif.title, {
+                body: newNotif.message,
+                icon: "/logo.png",
+                tag: newNotif.id,
+              });
 
-            systemNotif.onclick = (e) => {
-              e.preventDefault();
-              window.focus();
-              router.push(newNotif.link);
-            };
+              systemNotif.onclick = (e) => {
+                e.preventDefault();
+                window.focus();
+                router.push(newNotif.link);
+              };
+            }
           }
         }
       )

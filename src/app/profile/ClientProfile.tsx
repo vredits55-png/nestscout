@@ -29,6 +29,37 @@ export default function ProfilePage({
   const [linkError, setLinkError] = useState("");
   const [linkSuccess, setLinkSuccess] = useState("");
   const [linkingProgress, setLinkingProgress] = useState<Record<string, boolean>>({});
+  const [notificationPermission, setNotificationPermission] = useState<string>("default");
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      setNotificationPermission(Notification.permission);
+    }
+  }, []);
+
+  const requestPermission = async () => {
+    if (typeof window !== "undefined" && "Notification" in window) {
+      const permission = await Notification.requestPermission();
+      setNotificationPermission(permission);
+      if (permission === "granted") {
+        if ("serviceWorker" in navigator) {
+          navigator.serviceWorker.register("/sw.js").then((reg) => {
+            reg.showNotification("Notifications Enabled! 🔔", {
+              body: "You will now receive instant push alerts on this device.",
+              icon: "/logo.png",
+            });
+          });
+        } else {
+          new Notification("Notifications Enabled! 🔔", {
+            body: "You will now receive instant push alerts on this device.",
+            icon: "/logo.png",
+          });
+        }
+      }
+    } else {
+      alert("This browser/device does not support push notifications.");
+    }
+  };
 
   useEffect(() => {
     const linked = searchParams.get("linked");
@@ -411,19 +442,39 @@ export default function ProfilePage({
                     </div>
                  </div>
 
-                 <div className="bg-surface-container-lowest p-8 rounded-[2.5rem] shadow-ambient border border-outline-variant/20 block">
-                    <h3 className="font-headline font-bold text-lg text-on-surface mb-6 flex items-center gap-2">
-                      <Bell className="w-5 h-5 text-primary"/> Alerts & Inquiries
-                    </h3>
-                    <div className="space-y-4">
-                       <Link href="/conversations" className="block p-4 bg-surface-container-low rounded-[1.5rem] hover:bg-surface-container transition-colors border border-outline-variant/10 cursor-pointer">
-                          <div className="flex justify-between items-center mb-1">
-                             <h4 className="text-sm font-bold text-on-surface">Inbox Terminal</h4>
+                  <div className="bg-surface-container-lowest p-8 rounded-[2.5rem] shadow-ambient border border-outline-variant/20 block">
+                     <h3 className="font-headline font-bold text-lg text-on-surface mb-6 flex items-center gap-2">
+                       <Bell className="w-5 h-5 text-primary"/> Alerts & Inquiries
+                     </h3>
+                     <div className="space-y-4">
+                        {notificationPermission === "granted" ? (
+                          <div className="flex items-center gap-2.5 p-4 bg-primary/5 rounded-[1.5rem] border border-primary/20">
+                            <CheckCircle className="w-5 h-5 text-primary shrink-0" />
+                            <div>
+                              <h4 className="text-sm font-bold text-on-surface">Push Alerts Active</h4>
+                              <p className="text-xs text-on-surface-variant">You will receive system alerts on this device.</p>
+                            </div>
                           </div>
-                          <p className="text-xs text-on-surface-variant">View all active negotiations and chat rooms.</p>
-                       </Link>
-                    </div>
-                 </div>
+                        ) : (
+                          <button
+                            onClick={requestPermission}
+                            className="w-full flex justify-between items-center p-4 bg-primary/10 hover:bg-primary/25 transition-colors rounded-[1.5rem] border border-primary/20 cursor-pointer text-left"
+                          >
+                            <div>
+                              <h4 className="text-sm font-bold text-on-surface">Enable Push Alerts</h4>
+                              <p className="text-xs text-on-surface-variant">Allow this browser/device to receive real-time push alerts.</p>
+                            </div>
+                            <span className="bg-primary text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shrink-0 ml-2">Enable</span>
+                          </button>
+                        )}
+                        <Link href="/conversations" className="block p-4 bg-surface-container-low rounded-[1.5rem] hover:bg-surface-container transition-colors border border-outline-variant/10 cursor-pointer">
+                           <div className="flex justify-between items-center mb-1">
+                              <h4 className="text-sm font-bold text-on-surface">Inbox Terminal</h4>
+                           </div>
+                           <p className="text-xs text-on-surface-variant">View all active negotiations and chat rooms.</p>
+                        </Link>
+                     </div>
+                  </div>      
                  
                  {/* Visual Decorator */}
                  <div className="hidden lg:flex w-full h-48 rounded-[2.5rem] relative overflow-hidden glass-card ambient-glow border-white/50 bg-gradient-to-tr from-surface-variant/40 to-surface-container-lowest/20 flex-col justify-end p-6">
