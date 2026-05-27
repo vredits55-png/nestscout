@@ -70,9 +70,9 @@
   --color-border: #bbcbb5;
 
   /* Typography */
-  --font-headline: var(--font-plus-jakarta-sans), system-ui, sans-serif;
-  --font-body: var(--font-manrope), system-ui, sans-serif;
-  --font-heading: var(--font-plus-jakarta-sans), system-ui, sans-serif;
+  --font-headline: "Plus Jakarta Sans", system-ui, sans-serif;
+  --font-body: "Manrope", system-ui, sans-serif;
+  --font-heading: "Plus Jakarta Sans", system-ui, sans-serif;
 
   /* Shadows — ambient tinted glows, never pure black */
   --shadow-ambient: 0 20px 50px -10px rgba(21, 30, 20, 0.06);
