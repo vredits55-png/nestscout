@@ -33,6 +33,8 @@ export default function DeleteConversationButton({
         } else {
           setShowConfirm(false);
         }
+      } catch (err: any) {
+        alert("Failed to request deletion: " + (err?.message || err));
       } finally {
         setActiveAction(null);
       }
@@ -49,6 +51,8 @@ export default function DeleteConversationButton({
         } else if (result?.redirect) {
           window.location.href = "/conversations";
         }
+      } catch (err: any) {
+        alert("Failed to confirm deletion: " + (err?.message || err));
       } finally {
         setActiveAction(null);
       }
@@ -63,6 +67,8 @@ export default function DeleteConversationButton({
         if (result?.error) {
           alert(result.error);
         }
+      } catch (err: any) {
+        alert(`Failed to ${action} deletion request: ` + (err?.message || err));
       } finally {
         setActiveAction(null);
       }

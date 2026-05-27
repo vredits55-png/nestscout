@@ -426,13 +426,26 @@ export async function confirmConversationDeletion(conversationId: string) {
   if (bookingError) return { error: bookingError.message };
 
   // 3. Delete the conversation itself
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("conversations")
     .delete()
     .eq("id", conversationId)
-    .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`);
+    .select();
 
   if (error) return { error: error.message };
+
+  if (!data || data.length === 0) {
+    // Check if it still exists to distinguish between "already deleted" (success) and "permission denied" (error)
+    const { data: exists } = await supabase
+      .from("conversations")
+      .select("id")
+      .eq("id", conversationId)
+      .maybeSingle();
+
+    if (exists) {
+      return { error: "Failed to delete conversation due to permission restrictions." };
+    }
+  }
 
   revalidatePath("/conversations");
   revalidatePath("/provider/dashboard");
