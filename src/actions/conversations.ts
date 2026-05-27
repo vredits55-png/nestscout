@@ -138,6 +138,8 @@ export async function sendMessage(conversationId: string, content: string, messa
     .eq("id", conversationId);
 
   revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { success: true };
 }
 
@@ -267,6 +269,8 @@ export async function createBookingRequest(
   }
 
   revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { booking: data };
 }
 
@@ -299,6 +303,8 @@ export async function respondToBooking(bookingId: string, conversationId: string
   );
 
   revalidatePath(`/conversations/${conversationId}`);
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { success: true };
 }
 
@@ -393,7 +399,8 @@ export async function requestConversationDeletion(conversationId: string) {
   }
 
   revalidatePath(`/conversations/${conversationId}`);
-  revalidatePath('/conversations');
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { success: true };
 }
 
@@ -427,7 +434,8 @@ export async function confirmConversationDeletion(conversationId: string) {
 
   if (error) return { error: error.message };
 
-  revalidatePath('/conversations');
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { success: true, redirect: true };
 }
 
@@ -455,7 +463,8 @@ export async function cancelConversationDeletion(conversationId: string) {
   );
 
   revalidatePath(`/conversations/${conversationId}`);
-  revalidatePath('/conversations');
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { success: true };
 }
 
@@ -475,7 +484,8 @@ export async function markMessagesAsRead(conversationId: string) {
   if (error) return { error: error.message };
 
   revalidatePath(`/conversations/${conversationId}`);
-  revalidatePath('/conversations');
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { success: true };
 }
 
@@ -531,7 +541,8 @@ export async function cancelBookingRequest(bookingId: string, conversationId: st
   );
 
   revalidatePath(`/conversations/${conversationId}`);
-  revalidatePath('/conversations');
+  revalidatePath("/conversations");
+  revalidatePath("/provider/dashboard");
   return { success: true };
 }
 

@@ -3,7 +3,6 @@
 import { useState, useTransition } from "react";
 import { Trash2, AlertTriangle } from "lucide-react";
 import { requestConversationDeletion, confirmConversationDeletion, cancelConversationDeletion } from "@/actions/conversations";
-import { useRouter } from "next/navigation";
 
 interface DeleteConversationButtonProps {
   conversationId: string;
@@ -20,29 +19,38 @@ export default function DeleteConversationButton({
 }: DeleteConversationButtonProps) {
   const [isPending, startTransition] = useTransition();
   const [showConfirm, setShowConfirm] = useState(false);
-  const router = useRouter();
+
 
   const handleRequest = () => {
     if (!confirm("Are you sure you want to request deletion? The other party will have to confirm this.")) return;
     
     startTransition(async () => {
-      await requestConversationDeletion(conversationId);
-      setShowConfirm(false);
+      const result = await requestConversationDeletion(conversationId);
+      if (result?.error) {
+        alert(result.error);
+      } else {
+        setShowConfirm(false);
+      }
     });
   };
 
   const handleConfirm = () => {
     startTransition(async () => {
       const result = await confirmConversationDeletion(conversationId);
-      if (result.redirect) {
-        router.push("/conversations");
+      if (result?.error) {
+        alert(result.error);
+      } else if (result?.redirect) {
+        window.location.href = "/conversations";
       }
     });
   };
 
   const handleCancel = () => {
     startTransition(async () => {
-      await cancelConversationDeletion(conversationId);
+      const result = await cancelConversationDeletion(conversationId);
+      if (result?.error) {
+        alert(result.error);
+      }
     });
   };
 

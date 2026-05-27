@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import BookingRequestForm from "@/components/BookingRequestForm";
 import BookingCard from "@/components/BookingCard";
@@ -33,7 +32,7 @@ export default function ConversationSidebar({
   initialDeletionStatus,
   initialDeletionRequestedBy,
 }: ConversationSidebarProps) {
-  const router = useRouter();
+
   const [bookings, setBookings] = useState<BookingRequest[]>(initialBookings);
   const [conversationStatus, setConversationStatus] = useState<string>(initialStatus);
   const [deletionStatus, setDeletionStatus] = useState<string>(initialDeletionStatus);
@@ -115,7 +114,7 @@ export default function ConversationSidebar({
         },
         (payload) => {
           if (payload.eventType === "DELETE") {
-            router.push("/conversations");
+            window.location.href = "/conversations";
             return;
           }
           const updatedConv = payload.new as Conversation;
@@ -129,7 +128,7 @@ export default function ConversationSidebar({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, router]);
+  }, [conversationId]);
 
   return (
     <div className="space-y-6">

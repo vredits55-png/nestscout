@@ -85,7 +85,7 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
       .on(
         "postgres_changes",
         {
-          event: "UPDATE",
+          event: "*",
           schema: "public",
           table: "conversations",
         },

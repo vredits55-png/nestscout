@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useTransition } from "react";
-import { useRouter } from "next/navigation";
 import { Send, Calendar, CheckCircle, XCircle, Check, CheckCheck } from "lucide-react";
 import { sendMessage, markMessagesAsRead } from "@/actions/conversations";
 import { createClient } from "@/lib/supabase/client";
@@ -28,7 +27,7 @@ export default function ChatThread({
   const [newMessage, setNewMessage] = useState("");
   const [isPending, startTransition] = useTransition();
   const bottomRef = useRef<HTMLDivElement>(null);
-  const router = useRouter();
+
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -107,7 +106,7 @@ export default function ChatThread({
         },
         (payload) => {
           if (payload.eventType === "DELETE") {
-            router.push("/conversations");
+            window.location.href = "/conversations";
           }
         }
       )
@@ -116,7 +115,7 @@ export default function ChatThread({
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [conversationId, currentUserId, tenant, landlord, router]);
+  }, [conversationId, currentUserId, tenant, landlord]);
 
   function handleSend(e: React.FormEvent) {
     e.preventDefault();
