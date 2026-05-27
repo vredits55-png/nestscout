@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import SystemNotificationManager from "@/components/SystemNotificationManager";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { getUser } from "@/actions/auth";
 import { getUnreadConversationCount } from "@/actions/conversations";
@@ -48,6 +49,7 @@ export default async function RootLayout({
         <main className="flex-1 pt-[72px]">
           <MotionProvider>{children}</MotionProvider>
         </main>
+        <SpeedInsights />
       </body>
     </html>
   );
