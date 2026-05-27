@@ -402,6 +402,23 @@ export async function confirmConversationDeletion(conversationId: string) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  // 1. Delete messages first while parent conversation still exists (so RLS check succeeds)
+  const { error: msgError } = await supabase
+    .from("messages")
+    .delete()
+    .eq("conversation_id", conversationId);
+
+  if (msgError) return { error: msgError.message };
+
+  // 2. Delete booking requests while parent conversation still exists (so RLS check succeeds)
+  const { error: bookingError } = await supabase
+    .from("booking_requests")
+    .delete()
+    .eq("conversation_id", conversationId);
+
+  if (bookingError) return { error: bookingError.message };
+
+  // 3. Delete the conversation itself
   const { error } = await supabase
     .from("conversations")
     .delete()
