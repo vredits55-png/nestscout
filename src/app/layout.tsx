@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
+import { cookies } from "next/headers";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import SystemNotificationManager from "@/components/SystemNotificationManager";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 
 import { getUser } from "@/actions/auth";
-import { getUnreadConversationCount } from "@/actions/conversations";
 import RouteLoader from "@/components/RouteLoader";
 import MotionProvider from "@/components/MotionProvider";
 
@@ -25,8 +25,20 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const profile = await getUser();
-  const unreadCount = profile ? await getUnreadConversationCount() : 0;
+  // Check if user is logged in by inspecting cookies before making blocking server queries
+  const cookieStore = await cookies();
+  const hasAuthCookie = cookieStore.getAll().some(
+    (cookie) => cookie.name.includes("auth-token") || cookie.name.startsWith("sb-")
+  );
+
+  let profile = null;
+  if (hasAuthCookie) {
+    profile = await getUser();
+  }
+
+  // The unread messages count is fetched client-side in the Navbar component on mount anyway,
+  // so we pass 0 as the initial unreadCount to avoid blocking the critical server-side render.
+  const unreadCount = 0;
 
   return (
     <html lang="en" className="min-h-screen antialiased">
