@@ -153,19 +153,20 @@ export default function LoginPage() {
       <div className="absolute bottom-1/4 left-10 w-80 h-80 rounded-full bg-accent/20 blur-3xl animate-float delay-300 mix-blend-multiply" />
 
       <div className="w-full max-w-md relative z-10">
-        <div className="flex justify-between items-center mb-3 animate-fade-in-up">
+        <div className="flex items-center mb-4 animate-fade-in-up">
           <Link
             href="/"
-            className="text-xs font-bold px-4 py-2 rounded-full border border-primary/20 bg-white/40 hover:bg-white hover:border-primary/50 text-primary transition-all shadow-md backdrop-blur-md flex items-center gap-1"
+            className="flex items-center gap-2.5 group cursor-pointer"
           >
-            <ChevronLeft className="w-3.5 h-3.5" />
-            Return to Home
-          </Link>
-          <Link
-            href="/register"
-            className="text-xs font-bold px-4 py-2 rounded-full border border-primary/20 bg-white/40 hover:bg-white hover:border-primary/50 text-primary transition-all shadow-md backdrop-blur-md"
-          >
-            Create account
+            <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white shadow-sm ring-1 ring-black/5">
+              <img src="/logo.png" alt="NestScout Logo" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+            </div>
+            <span
+              className="text-xl font-bold tracking-tight text-[#0F172A]"
+              style={{ fontFamily: "var(--font-heading)" }}
+            >
+              NestScout
+            </span>
           </Link>
         </div>
 
