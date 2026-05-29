@@ -86,24 +86,6 @@ function RegisterContent() {
       <div className="absolute top-1/4 right-10 w-96 h-96 rounded-full bg-primary-light/20 blur-3xl animate-float mix-blend-multiply" />
       <div className="absolute bottom-1/4 left-10 w-80 h-80 rounded-full bg-accent/20 blur-3xl animate-float delay-300 mix-blend-multiply" />
 
-      {/* Brand logo at the exact top-left corner of the page */}
-      <div className="absolute top-6 left-6 z-20 animate-fade-in-up">
-        <Link
-          href="/"
-          className="flex items-center gap-2.5 group cursor-pointer"
-        >
-          <div className="w-8 h-8 rounded-lg overflow-hidden flex items-center justify-center bg-white shadow-sm ring-1 ring-black/5">
-            <img src="/logo.png" alt="NestScout Logo" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
-          </div>
-          <span
-            className="text-xl font-bold tracking-tight text-[#0F172A]"
-            style={{ fontFamily: "var(--font-heading)" }}
-          >
-            NestScout
-          </span>
-        </Link>
-      </div>
-
       <div className="w-full max-w-lg relative z-10">
         <div className="glass rounded-3xl p-8 sm:p-10 animate-fade-in-up shadow-2xl border border-white/20">
           <div className="text-center mb-6">

@@ -130,7 +130,7 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  if (pathname === "/login" || pathname === "/register" || pathname === "/select-role") return null;
+  if (pathname === "/select-role") return null;
 
   return (
     <nav 
@@ -215,13 +215,17 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
               </div>
             ) : (
               <div className="flex items-center gap-3 border-l border-[#E2E8F0] pl-6">
-                <Link href="/login" className="btn btn-ghost btn-sm">
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </Link>
-                <Link href="/register" className="btn btn-primary btn-sm">
-                  Get Started
-                </Link>
+                {pathname !== "/login" && (
+                  <Link href="/login" className="btn btn-ghost btn-sm">
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                )}
+                {pathname !== "/register" && (
+                  <Link href="/register" className="btn btn-primary btn-sm">
+                    Get Started
+                  </Link>
+                )}
               </div>
             )}
           </div>
@@ -309,21 +313,25 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
             </>
           ) : (
             <div className="flex flex-col gap-2 pt-2 border-t border-[#E2E8F0]">
-              <Link
-                href="/login"
-                className="btn btn-outline justify-center w-full"
-                onClick={() => setMobileOpen(false)}
-              >
-                <LogIn className="w-4 h-4" />
-                Sign In
-              </Link>
-              <Link
-                href="/register"
-                className="btn btn-primary justify-center w-full"
-                onClick={() => setMobileOpen(false)}
-              >
-                Get Started
-              </Link>
+              {pathname !== "/login" && (
+                <Link
+                  href="/login"
+                  className="btn btn-outline justify-center w-full"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  <LogIn className="w-4 h-4" />
+                  Sign In
+                </Link>
+              )}
+              {pathname !== "/register" && (
+                <Link
+                  href="/register"
+                  className="btn btn-primary justify-center w-full"
+                  onClick={() => setMobileOpen(false)}
+                >
+                  Get Started
+                </Link>
+              )}
             </div>
           )}
         </div>
