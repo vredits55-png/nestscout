@@ -25,6 +25,7 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
   const [mobileOpen, setMobileOpen] = useState(false);
   const [unread, setUnread] = useState(unreadCount);
   const pathname = usePathname();
+  const isAuthPage = pathname === "/login" || pathname === "/register";
 
   if (initialProfile !== prevInitialProfile) {
     setProfile(initialProfile || null);
@@ -159,13 +160,15 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center gap-6">
-            <Link href="/search" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] flex items-center gap-1.5 transition-colors">
-              <Search className="w-4 h-4" />
-              Search
-            </Link>
+            {!isAuthPage && (
+              <Link href="/search" className="text-sm font-medium text-[#475569] hover:text-[#0F172A] flex items-center gap-1.5 transition-colors">
+                <Search className="w-4 h-4" />
+                Search
+              </Link>
+            )}
 
             {profile ? (
-              <div className="flex items-center gap-4 border-l border-[#E2E8F0] pl-6">
+              <div className={`flex items-center gap-4 ${isAuthPage ? "" : "border-l border-[#E2E8F0] pl-6"}`}>
                 {profile.role === "provider" ? (
                   <Link
                     href="/provider/dashboard"
@@ -214,44 +217,50 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
                 </form>
               </div>
             ) : (
-              <div className="flex items-center gap-3 border-l border-[#E2E8F0] pl-6">
-                {pathname !== "/login" && (
-                  <Link href="/login" className="btn btn-ghost btn-sm">
-                    <LogIn className="w-4 h-4" />
-                    Sign In
-                  </Link>
-                )}
-                {pathname !== "/register" && (
-                  <Link href="/register" className="btn btn-primary btn-sm">
-                    Get Started
-                  </Link>
-                )}
-              </div>
+              !isAuthPage && (
+                <div className="flex items-center gap-3 border-l border-[#E2E8F0] pl-6">
+                  {pathname !== "/login" && (
+                    <Link href="/login" className="btn btn-ghost btn-sm">
+                      <LogIn className="w-4 h-4" />
+                      Sign In
+                    </Link>
+                  )}
+                  {pathname !== "/register" && (
+                    <Link href="/register" className="btn btn-primary btn-sm">
+                      Get Started
+                    </Link>
+                  )}
+                </div>
+              )
             )}
           </div>
 
           {/* Mobile Toggle */}
-          <button
-            className="md:hidden text-[#0F172A] p-2"
-            onClick={() => setMobileOpen(!mobileOpen)}
-            aria-label="Toggle menu"
-          >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-          </button>
+          {!isAuthPage && (
+            <button
+              className="md:hidden text-[#0F172A] p-2"
+              onClick={() => setMobileOpen(!mobileOpen)}
+              aria-label="Toggle menu"
+            >
+              {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          )}
         </div>
       </div>
 
       {/* Mobile Menu */}
       {mobileOpen && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-white border-b border-[#E2E8F0] shadow-lg animate-fade-in px-4 py-4 flex flex-col gap-4">
-          <Link
-            href="/search"
-            className="flex items-center gap-2 text-[#475569] hover:text-[#0F172A] font-medium"
-            onClick={() => setMobileOpen(false)}
-          >
-            <Search className="w-5 h-5" />
-            Search Rentals
-          </Link>
+          {!isAuthPage && (
+            <Link
+              href="/search"
+              className="flex items-center gap-2 text-[#475569] hover:text-[#0F172A] font-medium"
+              onClick={() => setMobileOpen(false)}
+            >
+              <Search className="w-5 h-5" />
+              Search Rentals
+            </Link>
+          )}
 
           {profile ? (
             <>
@@ -312,27 +321,29 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
               </form>
             </>
           ) : (
-            <div className="flex flex-col gap-2 pt-2 border-t border-[#E2E8F0]">
-              {pathname !== "/login" && (
-                <Link
-                  href="/login"
-                  className="btn btn-outline justify-center w-full"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  <LogIn className="w-4 h-4" />
-                  Sign In
-                </Link>
-              )}
-              {pathname !== "/register" && (
-                <Link
-                  href="/register"
-                  className="btn btn-primary justify-center w-full"
-                  onClick={() => setMobileOpen(false)}
-                >
-                  Get Started
-                </Link>
-              )}
-            </div>
+            !isAuthPage && (
+              <div className="flex flex-col gap-2 pt-2 border-t border-[#E2E8F0]">
+                {pathname !== "/login" && (
+                  <Link
+                    href="/login"
+                    className="btn btn-outline justify-center w-full"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    <LogIn className="w-4 h-4" />
+                    Sign In
+                  </Link>
+                )}
+                {pathname !== "/register" && (
+                  <Link
+                    href="/register"
+                    className="btn btn-primary justify-center w-full"
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    Get Started
+                  </Link>
+                )}
+              </div>
+            )
           )}
         </div>
       )}
