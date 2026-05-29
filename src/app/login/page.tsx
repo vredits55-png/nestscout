@@ -175,10 +175,13 @@ export default function LoginPage() {
               <img src="/logo.png" alt="NestScout" className="w-12 h-12 object-contain" />
             </Link>
             <h1 className="text-3xl font-bold text-text mb-2 tracking-tight">
-              Welcome back
+              Sign in to your account
             </h1>
             <p className="text-text-muted text-sm font-medium">
-              Log in to your NestScout account.
+              Or{" "}
+              <Link href="/register" className="font-bold text-primary hover:text-accent transition-colors underline">
+                create a new account
+              </Link>
             </p>
           </div>
 
@@ -194,6 +197,79 @@ export default function LoginPage() {
               <span>{successMessage}</span>
             </div>
           )}
+
+          {/* Social Logins Buttons Grid (2-column layout matching new UI) */}
+          <div className="grid grid-cols-2 gap-3 mb-6">
+            {/* Google OAuth */}
+            <button
+              type="button"
+              onClick={() => handleOAuthLogin("google")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl border border-primary/10 bg-white/40 hover:bg-white hover:border-primary/30 hover:shadow-sm transition-all duration-300 cursor-pointer group text-sm font-bold text-text"
+            >
+              <svg className="w-5 h-5 shrink-0 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
+                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
+                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05" />
+                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
+              </svg>
+              Google
+            </button>
+
+            {/* Discord OAuth */}
+            <button
+              type="button"
+              onClick={() => handleOAuthLogin("discord")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl border border-primary/10 bg-white/40 hover:bg-white hover:border-[#5865F2]/30 hover:bg-[#5865F2]/5 hover:shadow-sm transition-all duration-300 cursor-pointer group text-sm font-bold text-text"
+            >
+              <svg className="w-5 h-5 shrink-0 fill-[#5865F2] transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.873-.894a.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.894a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.156-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.156-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.156 2.418z" />
+              </svg>
+              Discord
+            </button>
+
+            {/* X OAuth */}
+            <button
+              type="button"
+              onClick={() => handleOAuthLogin("twitter")}
+              disabled={loading}
+              className="flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl border border-primary/10 bg-white/40 hover:bg-white hover:border-black/30 hover:bg-black/5 hover:shadow-sm transition-all duration-300 cursor-pointer group text-sm font-bold text-text"
+            >
+              <svg className="w-4.5 h-4.5 shrink-0 fill-black transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+              X (Twitter)
+            </button>
+
+            {/* Email OTP Switcher */}
+            <button
+              type="button"
+              onClick={() => {
+                setAuthMode(authMode === "otp" ? "password" : "otp");
+                setOtpStep("request");
+                setError("");
+                setSuccessMessage("");
+              }}
+              disabled={loading}
+              className={`flex items-center justify-center gap-2.5 px-4 py-3 rounded-xl border border-primary/10 hover:bg-white hover:shadow-sm transition-all duration-300 cursor-pointer group text-sm font-bold text-text ${
+                authMode === "otp" ? "bg-white border-primary shadow-sm scale-105" : "bg-white/40 hover:border-primary/30"
+              }`}
+            >
+              <Mail className="w-5 h-5 shrink-0 text-primary transition-transform duration-300 group-hover:scale-110" />
+              {authMode === "otp" ? "Use Password" : "Email OTP"}
+            </button>
+          </div>
+
+          {/* Separation Divider */}
+          <div className="relative mb-6 text-center">
+            <div className="absolute inset-0 flex items-center">
+              <span className="w-full border-t border-primary/10"></span>
+            </div>
+            <span className="relative bg-[#fafdfb] px-4 text-xs font-bold text-text-muted uppercase tracking-wider">
+              Or Continue With Email
+            </span>
+          </div>
 
           {/* PASSWORD LOGIN FORM */}
           {authMode === "password" && (
@@ -212,14 +288,9 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <div className="flex items-center justify-between mb-2">
-                  <label className="block text-sm font-bold text-primary">
-                    Password
-                  </label>
-                  <Link href="/forgot-password" className="text-sm font-bold text-accent hover:text-primary transition-colors">
-                    Forgot?
-                  </Link>
-                </div>
+                <label className="block text-sm font-bold text-primary mb-2">
+                  Password
+                </label>
                 <div className="relative">
                   <input
                     type={showPassword ? "text" : "password"}
@@ -241,6 +312,23 @@ export default function LoginPage() {
                     )}
                   </button>
                 </div>
+              </div>
+
+              {/* Utility Checkbox and Forgot Password Link Row */}
+              <div className="flex items-center justify-between mt-2 px-1">
+                <label className="flex items-center gap-2 text-sm text-text-muted font-bold cursor-pointer select-none">
+                  <input
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-2 border-primary/30 text-primary focus:ring-primary/20 cursor-pointer accent-primary"
+                  />
+                  Remember me
+                </label>
+                <Link
+                  href="/forgot-password"
+                  className="text-sm font-bold text-accent hover:text-primary transition-colors"
+                >
+                  Forgot your password?
+                </Link>
               </div>
 
               <button
@@ -293,20 +381,6 @@ export default function LoginPage() {
                       </>
                     )}
                   </button>
-
-                  <div className="text-center mt-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthMode("password");
-                        setError("");
-                        setSuccessMessage("");
-                      }}
-                      className="text-xs font-bold text-primary hover:text-accent hover:underline transition-colors focus:outline-none"
-                    >
-                      Back to Password Login
-                    </button>
-                  </div>
                 </form>
               ) : (
                 <form onSubmit={handleVerifyOtp} className="space-y-5">
@@ -357,100 +431,10 @@ export default function LoginPage() {
                       </>
                     )}
                   </button>
-
-                  <div className="text-center mt-4">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthMode("password");
-                        setOtpStep("request");
-                        setError("");
-                        setSuccessMessage("");
-                      }}
-                      className="text-xs font-bold text-primary hover:text-accent hover:underline transition-colors focus:outline-none"
-                    >
-                      Back to Password Login
-                    </button>
-                  </div>
                 </form>
               )}
             </div>
           )}
-
-          {/* Social Logins Divider */}
-          <div className="relative my-7 text-center">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-primary/10"></span>
-            </div>
-            <span className="relative bg-[#fafdfb] px-4 text-xs font-bold text-text-muted uppercase tracking-wider">
-              Or Connect Via
-            </span>
-          </div>
-
-          {/* Social Logins Buttons Grid */}
-          <div className="grid grid-cols-4 gap-3">
-            {/* Google OAuth */}
-            <button
-              type="button"
-              onClick={() => handleOAuthLogin("google")}
-              disabled={loading}
-              className="flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-primary/10 bg-white/40 hover:bg-white hover:border-primary/30 transition-all duration-300 hover:shadow-md cursor-pointer group"
-              title="Sign in with Google"
-            >
-              <svg className="w-6 h-6 transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4" />
-                <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853" />
-                <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l3.66-2.85z" fill="#FBBC05" />
-                <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.85c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
-              </svg>
-              <span className="text-[10px] font-bold text-text-muted mt-1.5">Google</span>
-            </button>
-
-            {/* Discord OAuth */}
-            <button
-              type="button"
-              onClick={() => handleOAuthLogin("discord")}
-              disabled={loading}
-              className="flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-primary/10 bg-white/40 hover:bg-white hover:border-[#5865F2]/30 hover:bg-[#5865F2]/5 transition-all duration-300 hover:shadow-md cursor-pointer group"
-              title="Sign in with Discord"
-            >
-              <svg className="w-6 h-6 fill-[#5865F2] transition-transform duration-300 group-hover:scale-110" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515a.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0a12.64 12.64 0 0 0-.617-1.25a.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057a19.9 19.9 0 0 0 5.993 3.03a.078.078 0 0 0 .084-.028a14.09 14.09 0 0 0 1.226-1.994a.076.076 0 0 0-.041-.106a13.107 13.107 0 0 1-1.873-.894a.077.077 0 0 1-.008-.128c.126-.093.252-.19.372-.287a.075.075 0 0 1 .077-.011c3.92 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.009c.12.099.246.195.373.289a.077.077 0 0 1-.006.127a12.299 12.299 0 0 1-1.873.894a.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028a19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.956-2.419 2.156-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.956 2.418-2.156 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419c0-1.333.955-2.419 2.156-2.419c1.21 0 2.176 1.096 2.157 2.42c0 1.333-.946 2.418-2.156 2.418z" />
-              </svg>
-              <span className="text-[10px] font-bold text-text-muted mt-1.5">Discord</span>
-            </button>
-
-            {/* X OAuth */}
-            <button
-              type="button"
-              onClick={() => handleOAuthLogin("twitter")}
-              disabled={loading}
-              className="flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-primary/10 bg-white/40 hover:bg-white hover:border-black/30 hover:bg-black/5 transition-all duration-300 hover:shadow-md cursor-pointer group"
-              title="Sign in with X"
-            >
-              <svg className="w-5.5 h-5.5 fill-black transition-transform duration-300 group-hover:scale-110 my-0.5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-              </svg>
-              <span className="text-[10px] font-bold text-text-muted mt-1.5">X (Twitter)</span>
-            </button>
-
-            {/* Email OTP Connection */}
-            <button
-              type="button"
-              onClick={() => {
-                setAuthMode("otp");
-                setOtpStep("request");
-                setError("");
-                setSuccessMessage("");
-              }}
-              disabled={loading}
-              className="flex flex-col items-center justify-center p-3 rounded-2xl border-2 border-primary/10 bg-white/40 hover:bg-white hover:border-primary/30 transition-all duration-300 hover:shadow-md cursor-pointer group"
-              title="Sign in with Email OTP"
-            >
-              <Mail className="w-6 h-6 text-primary transition-transform duration-300 group-hover:scale-110" />
-              <span className="text-[10px] font-bold text-text-muted mt-1.5">OTP</span>
-            </button>
-          </div>
         </div>
       </div>
     </div>
