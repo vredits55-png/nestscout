@@ -12,6 +12,17 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
     return { error: "You cannot inquire about or rent your own property." };
   }
 
+  // Validate landlordId matches property provider_id
+  const { data: propertyCheck } = await supabase
+    .from("properties")
+    .select("provider_id")
+    .eq("id", propertyId)
+    .single();
+
+  if (!propertyCheck || propertyCheck.provider_id !== landlordId) {
+    return { error: "Forged Landlord ID: The landlord ID must match the property provider ID." };
+  }
+
   // Check if conversation exists using maybeSingle to avoid query errors
   const { data: existing, error: selectError } = await supabase
     .from("conversations")
@@ -209,6 +220,51 @@ export async function createBookingRequest(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  // Fetch the conversation to verify that it belongs to the tenant and matches the property
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("tenant_id, property_id")
+    .eq("id", conversationId)
+    .single();
+
+  if (!conv) {
+    return { error: "Conversation not found." };
+  }
+
+  if (conv.tenant_id !== user.id) {
+    return { error: "Unauthorized: You do not own this conversation." };
+  }
+
+  if (conv.property_id !== propertyId) {
+    return { error: "Mismatched Booking: The property ID must match the conversation property ID." };
+  }
+
+  // Validate dates on the server side
+  const checkInDate = new Date(checkIn);
+  const checkOutDate = new Date(checkOut);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  if (isNaN(checkInDate.getTime()) || isNaN(checkOutDate.getTime())) {
+    return { error: "Invalid check-in or check-out date." };
+  }
+
+  if (checkOutDate <= checkInDate) {
+    return { error: "Check-out date must be after check-in date." };
+  }
+
+  if (checkInDate < today) {
+    return { error: "Check-in date cannot be in the past." };
+  }
+
+  if (proposedPrice <= 0) {
+    return { error: "Proposed price must be greater than zero." };
+  }
+
+  if (totalNights <= 0) {
+    return { error: "Total nights must be greater than zero." };
+  }
+
   const { data, error } = await supabase
     .from("booking_requests")
     .insert({
@@ -278,6 +334,17 @@ export async function respondToBooking(bookingId: string, conversationId: string
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  // Verify that the current user is the landlord of the associated conversation
+  const { data: conv } = await supabase
+    .from("conversations")
+    .select("landlord_id")
+    .eq("id", conversationId)
+    .single();
+
+  if (!conv || conv.landlord_id !== user.id) {
+    return { error: "Unauthorized: Only the landlord is permitted to accept or reject booking requests." };
+  }
 
   const newStatus = accept ? "accepted" : "rejected";
 

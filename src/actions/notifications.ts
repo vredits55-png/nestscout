@@ -12,6 +12,17 @@ export async function createNotification(
   link: string
 ) {
   const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  if (senderId !== user.id) {
+    return { error: "Unauthorized: You cannot forge the sender ID." };
+  }
+
+  if (userId === user.id) {
+    return { error: "Unauthorized: You cannot send notifications to yourself." };
+  }
+
   const { data, error } = await supabase
     .from("notifications")
     .insert({

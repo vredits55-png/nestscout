@@ -12,6 +12,16 @@ export async function createProperty(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "provider") {
+    return { error: "Unauthorized: Only users with the provider role can create listings." };
+  }
+
   const amenities = formData.getAll("amenities") as string[];
   const images = formData.getAll("image_urls") as string[];
 
@@ -43,6 +53,31 @@ export async function createProperty(formData: FormData) {
 
 export async function updateProperty(id: string, formData: FormData) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "provider") {
+    return { error: "Unauthorized: Only users with the provider role can update listings." };
+  }
+
+  const { data: property } = await supabase
+    .from("properties")
+    .select("provider_id")
+    .eq("id", id)
+    .single();
+
+  if (!property || property.provider_id !== user.id) {
+    return { error: "Unauthorized: You do not own this property." };
+  }
 
   const amenities = formData.getAll("amenities") as string[];
   const images = formData.getAll("image_urls") as string[];
@@ -79,6 +114,32 @@ export async function updateProperty(id: string, formData: FormData) {
 
 export async function deleteProperty(id: string) {
   const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile?.role !== "provider") {
+    return { error: "Unauthorized: Only users with the provider role can delete listings." };
+  }
+
+  const { data: property } = await supabase
+    .from("properties")
+    .select("provider_id")
+    .eq("id", id)
+    .single();
+
+  if (!property || property.provider_id !== user.id) {
+    return { error: "Unauthorized: You do not own this property." };
+  }
+
   const { error } = await supabase.from("properties").delete().eq("id", id);
 
   if (error) return { error: error.message };

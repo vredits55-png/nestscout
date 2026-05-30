@@ -153,6 +153,16 @@ export async function selectUserRole(role: "client" | "provider") {
     return { error: "Not authenticated" };
   }
 
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+
+  if (profile && profile.role !== "undecided") {
+    return { error: "Role cannot be changed once selected." };
+  }
+
   const { error } = await supabase
     .from("profiles")
     .upsert({
