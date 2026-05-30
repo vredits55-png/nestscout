@@ -1,3 +1,5 @@
+import type { Session } from "@supabase/supabase-js";
+
 export function parseJwt(token: string) {
   try {
     const base64Url = token.split(".")[1];
@@ -13,12 +15,12 @@ export function parseJwt(token: string) {
         .join("")
     );
     return JSON.parse(jsonPayload);
-  } catch (e) {
+  } catch {
     return null;
   }
 }
 
-export function getSessionProvider(session: any) {
+export function getSessionProvider(session: Session | null) {
   if (!session) return null;
   const user = session.user;
   if (!user) return null;

@@ -32,9 +32,11 @@ export default function Navbar({ initialProfile, unreadCount = 0 }: { initialPro
     setPrevInitialProfile(initialProfile);
   }
 
-  useEffect(() => {
+  const [prevUnreadCount, setPrevUnreadCount] = useState(unreadCount);
+  if (unreadCount !== prevUnreadCount) {
+    setPrevUnreadCount(unreadCount);
     setUnread(unreadCount);
-  }, [unreadCount]);
+  }
 
   useEffect(() => {
     if (!profile) return;

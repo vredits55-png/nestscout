@@ -21,6 +21,7 @@ import MapView from "@/components/MapView";
 import DynamicBackButton from "@/components/DynamicBackButton";
 import { getReviewsForProperty } from "@/actions/reviews";
 import ReviewForm from "@/components/ReviewForm";
+import type { Review } from "@/lib/types";
 
 
 interface PropertyPageProps {
@@ -269,7 +270,7 @@ export default async function PropertyPage({ params }: PropertyPageProps) {
                 </div>
               ) : (
                 <div className="space-y-6">
-                  {reviews.map((review: any) => (
+                  {reviews.map((review: Review) => (
                     <div key={review.id} className="glass-card p-6 sm:p-8 rounded-[2rem] space-y-4">
                       <div className="flex items-center justify-between flex-wrap gap-4">
                         <div className="flex items-center gap-3">

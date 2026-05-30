@@ -26,8 +26,9 @@ export default function SelectRolePage() {
         router.push(selectedRole === "provider" ? "/provider/dashboard" : "/");
         router.refresh();
       }
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred. Please try again.");
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(errMsg || "An unexpected error occurred. Please try again.");
       setLoading(false);
     }
   };

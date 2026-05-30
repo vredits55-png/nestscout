@@ -7,6 +7,7 @@ import type { Profile } from "@/lib/types";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useSearchParams } from "next/navigation";
+import type { UserIdentity } from "@supabase/supabase-js";
 
 export default function ProfilePage({
   initialProfile,
@@ -15,7 +16,7 @@ export default function ProfilePage({
 }: {
   initialProfile: Profile;
   userEmail: string;
-  initialIdentities: any[];
+  initialIdentities: UserIdentity[];
 }) {
   const searchParams = useSearchParams();
   const [fullName, setFullName] = useState(initialProfile.full_name || "");
@@ -25,7 +26,7 @@ export default function ProfilePage({
   const [error, setError] = useState("");
 
   const [linkedProviders, setLinkedProviders] = useState<string[]>(initialProfile.linked_providers || []);
-  const [identities, setIdentities] = useState<any[]>(initialIdentities);
+  const [identities, setIdentities] = useState<UserIdentity[]>(initialIdentities);
   const [linkError, setLinkError] = useState("");
   const [linkSuccess, setLinkSuccess] = useState("");
   const [linkingProgress, setLinkingProgress] = useState<Record<string, boolean>>({});
@@ -33,7 +34,10 @@ export default function ProfilePage({
 
   useEffect(() => {
     if (typeof window !== "undefined" && "Notification" in window) {
-      setNotificationPermission(Notification.permission);
+      const permission = Notification.permission;
+      setTimeout(() => {
+        setNotificationPermission(permission);
+      }, 0);
     }
   }, []);
 
@@ -67,13 +71,17 @@ export default function ProfilePage({
     const err = searchParams.get("error");
 
     if (err) {
-      setLinkError(err);
+      setTimeout(() => {
+        setLinkError(err);
+      }, 0);
       const newUrl = window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
       setTimeout(() => setLinkError(""), 6000);
     } else if (linked === "success" && prov) {
       const friendlyName = prov === 'twitter' ? 'X (Twitter)' : prov.charAt(0).toUpperCase() + prov.slice(1);
-      setLinkSuccess(`Successfully linked ${friendlyName} account!`);
+      setTimeout(() => {
+        setLinkSuccess(`Successfully linked ${friendlyName} account!`);
+      }, 0);
       const newUrl = window.location.pathname;
       window.history.replaceState({}, document.title, newUrl);
       setTimeout(() => setLinkSuccess(""), 5000);
@@ -93,7 +101,7 @@ export default function ProfilePage({
       // Map 'twitter' to the new 'x' OAuth 2.0 provider name in Supabase
       const actualProvider = provider === "twitter" ? "x" : provider;
       const { data, error } = await supabase.auth.linkIdentity({
-        provider: actualProvider as any,
+        provider: actualProvider as "google" | "discord" | "x",
         options: {
           redirectTo: `${window.location.origin}/api/auth/callback?linking=true&provider=${provider}&userId=${currentUserId}`,
           queryParams: actualProvider === "google" ? { prompt: "select_account" } : undefined,
@@ -109,8 +117,9 @@ export default function ProfilePage({
       } else {
         throw new Error("No authorization URL returned.");
       }
-    } catch (err: any) {
-      setLinkError(err?.message || `Failed to initiate linking for ${provider}.`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setLinkError(errMsg || `Failed to initiate linking for ${provider}.`);
       setLinkingProgress(prev => ({ ...prev, [provider]: false }));
     }
   }
@@ -143,8 +152,9 @@ export default function ProfilePage({
       setIdentities(prev => prev.filter(id => id.provider !== provider));
       setLinkSuccess(`Successfully unlinked ${provider === 'twitter' ? 'X (Twitter)' : provider.charAt(0).toUpperCase() + provider.slice(1)}.`);
       setTimeout(() => setLinkSuccess(""), 4000);
-    } catch (err: any) {
-      setLinkError(err?.message || `Failed to unlink ${provider}.`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setLinkError(errMsg || `Failed to unlink ${provider}.`);
     } finally {
       setLinkingProgress(prev => ({ ...prev, [provider]: false }));
     }

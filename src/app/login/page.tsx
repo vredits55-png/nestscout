@@ -63,8 +63,9 @@ export default function LoginPage() {
         setOtpStep("verify");
         setSuccessMessage("A secure 6-digit code has been sent to your email address.");
       }
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred sending OTP.");
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(errMsg || "An unexpected error occurred sending OTP.");
       setLoading(false);
     }
   }
@@ -116,8 +117,9 @@ export default function LoginPage() {
           router.refresh();
         }
       }
-    } catch (err: any) {
-      setError(err?.message || "An unexpected error occurred verifying OTP.");
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(errMsg || "An unexpected error occurred verifying OTP.");
       setLoading(false);
     }
   }
@@ -141,8 +143,9 @@ export default function LoginPage() {
         setError(oauthError.message);
         setLoading(false);
       }
-    } catch (err: any) {
-      setError(err?.message || `Failed to initialize ${provider} login.`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(errMsg || `Failed to initialize ${provider} login.`);
       setLoading(false);
     }
   }

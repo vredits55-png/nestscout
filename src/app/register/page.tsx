@@ -75,8 +75,9 @@ function RegisterContent() {
         setError(oauthError.message);
         setLoading(false);
       }
-    } catch (err: any) {
-      setError(err?.message || `Failed to initialize ${provider} registration.`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : String(err);
+      setError(errMsg || `Failed to initialize ${provider} registration.`);
       setLoading(false);
     }
   }

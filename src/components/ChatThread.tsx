@@ -4,7 +4,7 @@ import { useState, useRef, useEffect, useTransition } from "react";
 import { Send, Calendar, CheckCircle, XCircle, Check, CheckCheck } from "lucide-react";
 import { sendMessage, markMessagesAsRead } from "@/actions/conversations";
 import { createClient } from "@/lib/supabase/client";
-import type { Message, Profile, Conversation } from "@/lib/types";
+import type { Message, Profile } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 
 interface ChatThreadProps {
@@ -33,10 +33,11 @@ export default function ChatThread({
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  // Sync state when initialMessages changes
-  useEffect(() => {
+  const [prevInitialMessages, setPrevInitialMessages] = useState(initialMessages);
+  if (initialMessages !== prevInitialMessages) {
+    setPrevInitialMessages(initialMessages);
     setMessages(initialMessages);
-  }, [initialMessages]);
+  }
 
   // Mark messages as read when conversation opens
   useEffect(() => {

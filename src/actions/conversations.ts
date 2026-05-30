@@ -49,33 +49,6 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
 
       if (updateError) return { error: updateError.message };
 
-      // Create Enquiry Notification on restore
-      try {
-        const { data: tenantProfile } = await supabase
-          .from("profiles")
-          .select("full_name")
-          .eq("id", user.id)
-          .single();
-
-        const { data: prop } = await supabase
-          .from("properties")
-          .select("title")
-          .eq("id", propertyId)
-          .single();
-
-        await supabase.from("notifications").insert({
-          user_id: landlordId,
-          sender_id: user.id,
-          type: "enquiry",
-          title: "New Rent Enquiry",
-          message: `${tenantProfile?.full_name || "A renter"} sent an enquiry for "${prop?.title || "your property"}".`,
-          link: `/conversations/${existing.id}`,
-          is_read: false,
-        });
-      } catch (err) {
-        console.error("Failed to create enquiry notification on restore:", err);
-      }
-
       revalidatePath(`/conversations/${existing.id}`);
       return { conversation: restored };
     }
@@ -98,33 +71,6 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
 
   if (error) return { error: error.message };
 
-  // Create Enquiry Notification
-  try {
-    const { data: tenantProfile } = await supabase
-      .from("profiles")
-      .select("full_name")
-      .eq("id", user.id)
-      .single();
-
-    const { data: prop } = await supabase
-      .from("properties")
-      .select("title")
-      .eq("id", propertyId)
-      .single();
-
-    await supabase.from("notifications").insert({
-      user_id: landlordId,
-      sender_id: user.id,
-      type: "enquiry",
-      title: "New Rent Enquiry",
-      message: `${tenantProfile?.full_name || "A renter"} sent an enquiry for "${prop?.title || "your property"}".`,
-      link: `/conversations/${data.id}`,
-      is_read: false,
-    });
-  } catch (err) {
-    console.error("Failed to create enquiry notification:", err);
-  }
-  
   revalidatePath("/conversations");
   return { conversation: data };
 }
@@ -265,6 +211,12 @@ export async function createBookingRequest(
     return { error: "Total nights must be greater than zero." };
   }
 
+  const diffTime = checkOutDate.getTime() - checkInDate.getTime();
+  const calculatedNights = Math.round(diffTime / (1000 * 60 * 60 * 24));
+  if (totalNights !== calculatedNights) {
+    return { error: `Mismatched total nights: expected ${calculatedNights}, got ${totalNights}.` };
+  }
+
   const { data, error } = await supabase
     .from("booking_requests")
     .insert({
@@ -295,35 +247,6 @@ export async function createBookingRequest(
     "booking_request"
   );
 
-  // Create booking request notification
-  try {
-    const { data: conv } = await supabase
-      .from("conversations")
-      .select("landlord_id, property:properties(title)")
-      .eq("id", conversationId)
-      .single();
-
-    if (conv) {
-      const { data: tenantProfile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
-
-      await supabase.from("notifications").insert({
-        user_id: conv.landlord_id,
-        sender_id: user.id,
-        type: "booking_request",
-        title: "New Booking Request",
-        message: `${tenantProfile?.full_name || "A renter"} requested to book "${(conv.property as any)?.title || "your property"}".`,
-        link: `/conversations/${conversationId}`,
-        is_read: false,
-      });
-    }
-  } catch (err) {
-    console.error("Failed to create booking request notification:", err);
-  }
-
   revalidatePath(`/conversations/${conversationId}`);
   revalidatePath("/conversations");
   revalidatePath("/provider/dashboard");
@@ -334,6 +257,21 @@ export async function respondToBooking(bookingId: string, conversationId: string
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
+
+  // Verify that the booking request exists and matches the conversationId
+  const { data: booking } = await supabase
+    .from("booking_requests")
+    .select("conversation_id")
+    .eq("id", bookingId)
+    .single();
+
+  if (!booking) {
+    return { error: "Booking request not found." };
+  }
+
+  if (booking.conversation_id !== conversationId) {
+    return { error: "Mismatched Booking: The booking request does not belong to the supplied conversation." };
+  }
 
   // Verify that the current user is the landlord of the associated conversation
   const { data: conv } = await supabase
@@ -434,36 +372,6 @@ export async function requestConversationDeletion(conversationId: string) {
     "🗑️ The other party has requested to delete this conversation. Do you agree?",
     "system"
   );
-
-  // Create deletion request notification
-  try {
-    const { data: conv } = await supabase
-      .from("conversations")
-      .select("tenant_id, landlord_id, property:properties(title)")
-      .eq("id", conversationId)
-      .single();
-
-    if (conv) {
-      const recipientId = user.id === conv.tenant_id ? conv.landlord_id : conv.tenant_id;
-      const { data: senderProfile } = await supabase
-        .from("profiles")
-        .select("full_name")
-        .eq("id", user.id)
-        .single();
-
-      await supabase.from("notifications").insert({
-        user_id: recipientId,
-        sender_id: user.id,
-        type: "deletion_request",
-        title: "Conversation Deletion Requested",
-        message: `${senderProfile?.full_name || "The other party"} requested to delete the conversation for "${(conv.property as any)?.title || "property"}".`,
-        link: `/conversations/${conversationId}`,
-        is_read: false,
-      });
-    }
-  } catch (err) {
-    console.error("Failed to create deletion request notification:", err);
-  }
 
   revalidatePath(`/conversations/${conversationId}`);
   revalidatePath("/conversations");
@@ -582,6 +490,10 @@ export async function cancelBookingRequest(bookingId: string, conversationId: st
 
   if (fetchError || !booking) {
     return { error: "Booking request not found." };
+  }
+
+  if (booking.conversation_id !== conversationId) {
+    return { error: "Mismatched Booking: The booking request does not belong to the supplied conversation." };
   }
 
   if (booking.tenant_id !== user.id) {

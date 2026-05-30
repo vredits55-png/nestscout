@@ -38,22 +38,29 @@ export default function ConversationSidebar({
   const [deletionStatus, setDeletionStatus] = useState<string>(initialDeletionStatus);
   const [deletionRequestedBy, setDeletionRequestedBy] = useState<string | null>(initialDeletionRequestedBy);
 
-  // Sync with props if they change (e.g. from server page navigation)
-  useEffect(() => {
+  const [prevInitialBookings, setPrevInitialBookings] = useState(initialBookings);
+  if (initialBookings !== prevInitialBookings) {
+    setPrevInitialBookings(initialBookings);
     setBookings(initialBookings);
-  }, [initialBookings]);
+  }
 
-  useEffect(() => {
+  const [prevInitialStatus, setPrevInitialStatus] = useState(initialStatus);
+  if (initialStatus !== prevInitialStatus) {
+    setPrevInitialStatus(initialStatus);
     setConversationStatus(initialStatus);
-  }, [initialStatus]);
+  }
 
-  useEffect(() => {
+  const [prevInitialDeletionStatus, setPrevInitialDeletionStatus] = useState(initialDeletionStatus);
+  if (initialDeletionStatus !== prevInitialDeletionStatus) {
+    setPrevInitialDeletionStatus(initialDeletionStatus);
     setDeletionStatus(initialDeletionStatus);
-  }, [initialDeletionStatus]);
+  }
 
-  useEffect(() => {
+  const [prevInitialDeletionRequestedBy, setPrevInitialDeletionRequestedBy] = useState(initialDeletionRequestedBy);
+  if (initialDeletionRequestedBy !== prevInitialDeletionRequestedBy) {
+    setPrevInitialDeletionRequestedBy(initialDeletionRequestedBy);
     setDeletionRequestedBy(initialDeletionRequestedBy);
-  }, [initialDeletionRequestedBy]);
+  }
 
   useEffect(() => {
     const supabase = createClient();

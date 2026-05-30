@@ -15,9 +15,11 @@ interface ConversationsListProps {
 export default function ConversationsList({ initialConversations, currentUserId }: ConversationsListProps) {
   const [conversations, setConversations] = useState<Conversation[]>(initialConversations);
 
-  useEffect(() => {
+  const [prevInitialConversations, setPrevInitialConversations] = useState(initialConversations);
+  if (initialConversations !== prevInitialConversations) {
+    setPrevInitialConversations(initialConversations);
     setConversations(initialConversations);
-  }, [initialConversations]);
+  }
 
   useEffect(() => {
     const supabase = createClient();
