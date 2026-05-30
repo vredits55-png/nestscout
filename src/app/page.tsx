@@ -1,38 +1,24 @@
-"use client";
-
 import Link from "next/link";
-import { motion } from "framer-motion";
-import {
-  Search,
-  MapPin,
-  ArrowRight,
-} from "lucide-react";
+import { Search, MapPin, ArrowRight } from "lucide-react";
+import { cookies } from "next/headers";
+import { getUser } from "@/actions/auth";
+import Image from "next/image";
 
-import { useEffect, useState } from "react";
-
-export default function HomePage() {
-  const [listUrl, setListUrl] = useState("/register?role=provider");
-  
+export default async function HomePage() {
   // Conditionally check if the current user is already a provider
   // so the 'List a Property' button smartly redirects them to their dashboard
-  useEffect(() => {
-    const checkRole = async () => {
-       import("@/lib/supabase/client").then(({ createClient }) => {
-         const supabase = createClient();
-         supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) {
-              supabase.from("profiles").select("role").eq("id", user.id).single()
-               .then(({ data }) => {
-                 if (data?.role === "provider") {
-                   setListUrl("/provider/dashboard");
-                 }
-               });
-            }
-         });
-       });
-    };
-    checkRole();
-  }, []);
+  const cookieStore = await cookies();
+  const hasAuthCookie = cookieStore.getAll().some(
+    (cookie) => cookie.name.includes("auth-token") || cookie.name.startsWith("sb-")
+  );
+
+  let listUrl = "/register?role=provider";
+  if (hasAuthCookie) {
+    const user = await getUser();
+    if (user?.role === "provider") {
+      listUrl = "/provider/dashboard";
+    }
+  }
 
   return (
     <div className="bg-transparent">
@@ -46,12 +32,14 @@ export default function HomePage() {
             Moving beyond listings. We curate living spaces that reflect your personality, values, and vision for the future.
           </p>
 
-          {/* Editorial Search Bar Link (Instead of building full search form here) */}
+          {/* Editorial Search Bar Link */}
           <div className="bg-surface-container-lowest rounded-xl p-3 ambient-glow flex flex-col md:flex-row gap-4 items-center animate-fade-in-up delay-150">
-            <div className="flex-1 w-full flex items-center gap-3 px-4 border-b-2 border-transparent transition-all">
+            <Link href="/search" className="flex-1 w-full flex items-center gap-3 px-4 transition-all cursor-pointer">
               <MapPin className="text-outline w-5 h-5 block" />
-              <input readOnly className="w-full bg-transparent border-none focus:ring-0 py-3 text-on-surface placeholder:text-outline-variant cursor-pointer" placeholder="Where to?" type="text" onClick={() => window.location.href='/search'}/>
-            </div>
+              <div className="w-full py-3 text-outline-variant font-medium select-none text-left">
+                Where to?
+              </div>
+            </Link>
             <Link href="/search" className="editorial-gradient text-on-primary w-full md:w-auto px-8 py-4 rounded-xl font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity">
               <Search className="w-5 h-5 block" />
               Search Options
@@ -61,8 +49,26 @@ export default function HomePage() {
         
         <div className="lg:col-span-6 relative animate-slide-right delay-200">
           <div className="grid grid-cols-2 gap-4">
-            <img alt="Luxury home exterior" className="w-full h-80 object-cover arch-mask-left shadow-2xl" src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"/>
-            <img alt="Modern living room" className="w-full h-80 object-cover rounded-xl translate-y-12 shadow-ambient" src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80"/>
+            <div className="w-full h-80 rounded-xl overflow-hidden arch-mask-left shadow-2xl relative">
+              <Image
+                alt="Luxury home exterior"
+                className="object-cover"
+                src="https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?auto=format&fit=crop&w=800&q=80"
+                fill
+                sizes="(max-width: 1024px) 50vw, 30vw"
+                priority
+              />
+            </div>
+            <div className="w-full h-80 rounded-xl overflow-hidden translate-y-12 shadow-ambient relative">
+              <Image
+                alt="Modern living room"
+                className="object-cover"
+                src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=800&q=80"
+                fill
+                sizes="(max-width: 1024px) 50vw, 30vw"
+                priority
+              />
+            </div>
           </div>
           {/* Decorative Elements */}
           <div className="absolute -z-10 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-surface-container-low rounded-full blur-[100px] opacity-70 animate-breathe"></div>
@@ -85,27 +91,23 @@ export default function HomePage() {
       {/* ================== TESTIMONIALS (Editorial Style) ================== */}
       <section className="bg-surface-container-low py-24 px-8 overflow-hidden">
         <div className="max-w-[1440px] mx-auto">
-          <motion.div 
-            className="text-center mb-16"
-            initial={{ opacity: 0, y: 30 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true, margin: "-100px" }}
-            transition={{ duration: 0.6 }}
-          >
+          <div className="text-center mb-16 animate-fade-in-up">
             <h2 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface mb-4">Stories of Belonging.</h2>
             <p className="text-on-surface-variant max-w-xl mx-auto italic">How our members found more than just a roof over their heads.</p>
-          </motion.div>
+          </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Testimonial 1 */}
-            <motion.div 
-              className="bg-surface-container-lowest p-10 rounded-2xl ambient-glow flex flex-col md:flex-row gap-8 items-start hover:-translate-y-2 transition-transform duration-500"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, delay: 0.1 }}
-            >
-              <img alt="Sarah Jenkins" className="w-24 h-24 rounded-full object-cover grayscale" src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80"/>
+            <div className="bg-surface-container-lowest p-10 rounded-2xl ambient-glow flex flex-col md:flex-row gap-8 items-start hover:-translate-y-2 transition-transform duration-500 animate-fade-in-up delay-75">
+              <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 grayscale relative">
+                <Image
+                  alt="Sarah Jenkins"
+                  className="object-cover"
+                  src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=200&q=80"
+                  fill
+                  sizes="96px"
+                />
+              </div>
               <div className="space-y-4">
                 <div className="flex text-primary">
                   {Array.from({length: 5}).map((_, i) => (
@@ -120,17 +122,19 @@ export default function HomePage() {
                   <p className="text-sm text-outline uppercase tracking-widest font-bold">Creative Director</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
 
             {/* Testimonial 2 */}
-            <motion.div 
-              className="bg-surface-container-lowest p-10 rounded-2xl ambient-glow flex flex-col md:flex-row gap-8 items-start hover:-translate-y-2 transition-transform duration-500"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-100px" }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-            >
-              <img alt="Marcus Thorne" className="w-24 h-24 rounded-full object-cover grayscale border-2 border-surface-container-high" src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=200&q=80"/>
+            <div className="bg-surface-container-lowest p-10 rounded-2xl ambient-glow flex flex-col md:flex-row gap-8 items-start hover:-translate-y-2 transition-transform duration-500 animate-fade-in-up delay-150">
+              <div className="w-24 h-24 rounded-full overflow-hidden shrink-0 grayscale border-2 border-surface-container-high relative">
+                <Image
+                  alt="Marcus Thorne"
+                  className="object-cover"
+                  src="https://images.unsplash.com/photo-1506277886164-e25aa3f4ef7f?auto=format&fit=crop&w=200&q=80"
+                  fill
+                  sizes="96px"
+                />
+              </div>
               <div className="space-y-4">
                 <div className="flex text-primary">
                   {Array.from({length: 5}).map((_, i) => (
@@ -145,7 +149,7 @@ export default function HomePage() {
                   <p className="text-sm text-outline uppercase tracking-widest font-bold">Tech Founder</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           </div>
         </div>
       </section>
@@ -153,21 +157,10 @@ export default function HomePage() {
       {/* ================== CTA SECTION ================== */}
       <section className="bg-surface py-24 px-8 relative overflow-hidden">
          <div className="max-w-4xl mx-auto text-center relative z-10">
-            <motion.h2 
-              className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface mb-8"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-            >
+            <h2 className="text-4xl md:text-5xl font-headline font-extrabold text-on-surface mb-8 animate-fade-in-up">
               Ready to shape the future of living?
-            </motion.h2>
-            <motion.div 
-              className="flex flex-col sm:flex-row justify-center gap-6"
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.2 }}
-            >
+            </h2>
+            <div className="flex flex-col sm:flex-row justify-center gap-6 animate-fade-in-up delay-150">
               <Link href="/search" className="btn btn-primary text-lg px-8 py-4">
                 Start Searching
                 <ArrowRight className="w-5 h-5" />
@@ -175,7 +168,7 @@ export default function HomePage() {
               <Link href={listUrl} className="btn btn-ghost text-lg px-8 py-4">
                 List a Property
               </Link>
-            </motion.div>
+            </div>
          </div>
          {/* Decorative blob */}
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] -z-0"></div>
