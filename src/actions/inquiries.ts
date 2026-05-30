@@ -24,54 +24,59 @@ export async function sendInquiry(formData: FormData) {
   return { success: true };
 }
 
-export async function getReceivedInquiries() {
+export async function getReceivedInquiries(userId?: string) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let finalUserId = userId;
 
-  if (!user) return [];
+  if (!finalUserId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+    finalUserId = user.id;
+  }
 
   const { data: convs } = await supabase
     .from("conversations")
     .select("*, property:properties(*), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
-    .eq("landlord_id", user.id)
+    .eq("landlord_id", finalUserId)
     .order("updated_at", { ascending: false });
 
-  if (!convs) return [];
+  if (!convs || convs.length === 0) return [];
 
-  const inquiries = [];
-  for (const conv of convs) {
-    const { data: msgs } = await supabase
-      .from("messages")
-      .select("*")
-      .eq("conversation_id", conv.id)
-      .order("created_at", { ascending: false })
-      .limit(1);
+  const promises = convs.map(async (conv) => {
+    const [msgsResult, unreadResult] = await Promise.all([
+      supabase
+        .from("messages")
+        .select("*")
+        .eq("conversation_id", conv.id)
+        .order("created_at", { ascending: false })
+        .limit(1),
+      supabase
+        .from("messages")
+        .select("*", { count: "exact", head: true })
+        .eq("conversation_id", conv.id)
+        .neq("sender_id", finalUserId)
+        .eq("is_read", false)
+    ]);
 
-    const latestMsg = msgs?.[0];
+    const latestMsg = msgsResult.data?.[0];
+    const unreadCount = unreadResult.count ?? 0;
 
-    const { count: unreadCount } = await supabase
-      .from("messages")
-      .select("*", { count: "exact", head: true })
-      .eq("conversation_id", conv.id)
-      .neq("sender_id", user.id)
-      .eq("is_read", false);
-
-    inquiries.push({
+    return {
       id: conv.id,
       property_id: conv.property_id,
       sender_id: conv.tenant_id,
       receiver_id: conv.landlord_id,
       message: latestMsg?.content || "No messages yet",
-      is_read: (unreadCount ?? 0) === 0,
+      is_read: unreadCount === 0,
       created_at: latestMsg?.created_at || conv.updated_at,
       sender: conv.tenant,
       property: conv.property,
-    });
-  }
+    };
+  });
 
-  return inquiries;
+  return Promise.all(promises);
 }
 
 export async function markInquiryRead(id: string) {

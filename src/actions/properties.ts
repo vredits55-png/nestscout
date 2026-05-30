@@ -87,18 +87,22 @@ export async function deleteProperty(id: string) {
   return { success: true };
 }
 
-export async function getProviderProperties() {
+export async function getProviderProperties(userId?: string) {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  let finalUserId = userId;
 
-  if (!user) return [];
+  if (!finalUserId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+    finalUserId = user.id;
+  }
 
   const { data } = await supabase
     .from("properties")
     .select("*")
-    .eq("provider_id", user.id)
+    .eq("provider_id", finalUserId)
     .order("created_at", { ascending: false });
 
   return data ?? [];

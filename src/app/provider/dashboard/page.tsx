@@ -22,8 +22,8 @@ export default async function ProviderDashboard() {
   if (!user || user.role !== "provider") redirect("/");
 
   const [properties, inquiries] = await Promise.all([
-    getProviderProperties(),
-    getReceivedInquiries(),
+    getProviderProperties(user.id),
+    getReceivedInquiries(user.id),
   ]);
 
   const unreadCount = inquiries.filter((i: Inquiry) => !i.is_read).length;
