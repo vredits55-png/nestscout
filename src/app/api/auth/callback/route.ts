@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { getSessionProvider } from "@/lib/auth-helpers";
 
 export async function GET(request: Request) {
@@ -40,13 +41,11 @@ export async function GET(request: Request) {
             if (linkedIdentity) {
               const identityEmail = linkedIdentity.identity_data?.email;
               if (identityEmail) {
-                const { data: existingProfile } = await supabase
-                  .from("profiles")
-                  .select("id")
-                  .eq("email", identityEmail)
-                  .maybeSingle();
+                const adminSupabase = createAdminClient();
+                const { data: existingProfileId } = await adminSupabase
+                  .rpc("get_profile_id_by_email", { email_to_check: identityEmail });
 
-                if (existingProfile && existingProfile.id !== user.id) {
+                if (existingProfileId && existingProfileId !== user.id) {
                   // Immediately unlink to prevent session merger / hijack
                   await supabase.auth.unlinkIdentity(linkedIdentity);
                   return NextResponse.redirect(
@@ -58,7 +57,7 @@ export async function GET(request: Request) {
 
             // Update linked_providers in DB
             const { data: profile } = await supabase
-              .from("profiles")
+              .from("profiles_private")
               .select("linked_providers")
               .eq("id", user.id)
               .single();
@@ -67,21 +66,28 @@ export async function GET(request: Request) {
             if (!currentLinked.includes(linkingProvider)) {
               const updatedLinked = [...currentLinked, linkingProvider];
               await supabase
-                .from("profiles")
-                .update({ linked_providers: updatedLinked })
-                .eq("id", user.id);
+                .rpc("update_linked_providers", {
+                  user_id: user.id,
+                  new_providers: updatedLinked,
+                });
             }
             return NextResponse.redirect(`${origin}/profile?linked=success&provider=${linkingProvider}`);
           }
 
           const { data: profile } = await supabase
             .from("profiles")
-            .select("role, provider, linked_providers")
+            .select("role")
+            .eq("id", user.id)
+            .single();
+
+          const { data: privateProfile } = await supabase
+            .from("profiles_private")
+            .select("provider, linked_providers")
             .eq("id", user.id)
             .single();
           
-          const profileProvider = profile?.provider;
-          const linkedProviders = profile?.linked_providers || [];
+          const profileProvider = privateProfile?.provider;
+          const linkedProviders = privateProfile?.linked_providers || [];
           const sessionProvider = getSessionProvider(session);
 
           const isEquivalent = (p1: string, p2: string) => 

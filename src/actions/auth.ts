@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { getSessionProvider } from "@/lib/auth-helpers";
@@ -14,10 +15,14 @@ export async function signUp(formData: FormData) {
   const fullName = formData.get("full_name") as string;
   const role = formData.get("role") as string;
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl && process.env.NODE_ENV === "production") {
+    throw new Error("NEXT_PUBLIC_SITE_URL environment variable is required in production.");
+  }
   const headersList = await headers();
   const host = headersList.get("host") || "localhost:3000";
   const protocol = headersList.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-  const origin = `${protocol}://${host}`;
+  const origin = siteUrl || `${protocol}://${host}`;
 
   const { data, error } = await supabase.auth.signUp({
     email,
@@ -52,15 +57,12 @@ export async function signIn(formData: FormData) {
 
   let email = emailOrUsername;
   if (emailOrUsername && !emailOrUsername.includes("@")) {
-    // It's a username, lookup email in profiles
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("email")
-      .ilike("email", `${emailOrUsername}@%`)
-      .maybeSingle();
+    const adminSupabase = createAdminClient();
+    const { data: resolvedEmail } = await adminSupabase
+      .rpc("get_email_by_username", { username_to_check: emailOrUsername });
       
-    if (profile?.email) {
-      email = profile.email;
+    if (resolvedEmail) {
+      email = resolvedEmail;
     } else {
       return { error: "No account found with this username." };
     }
@@ -82,12 +84,18 @@ export async function signIn(formData: FormData) {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, provider, linked_providers")
+      .select("role")
       .eq("id", user.id)
       .single();
 
-    const profileProvider = profile?.provider;
-    const linkedProviders = profile?.linked_providers || [];
+    const { data: privateProfile } = await supabase
+      .from("profiles_private")
+      .select("provider, linked_providers")
+      .eq("id", user.id)
+      .single();
+
+    const profileProvider = privateProfile?.provider;
+    const linkedProviders = privateProfile?.linked_providers || [];
     const sessionProvider = getSessionProvider(session);
 
     const isEquivalent = (p1: string, p2: string) => 
@@ -140,6 +148,18 @@ export async function getUser() {
     .eq("id", user.id)
     .single();
 
+  if (profile) {
+    const { data: privateProfile } = await supabase
+      .from("profiles_private")
+      .select("email, phone, provider, linked_providers")
+      .eq("id", user.id)
+      .single();
+
+    if (privateProfile) {
+      Object.assign(profile, privateProfile);
+    }
+  }
+
   return profile;
 }
 
@@ -165,12 +185,11 @@ export async function selectUserRole(role: "client" | "provider") {
 
   const { error } = await supabase
     .from("profiles")
-    .upsert({
-      id: user.id,
-      email: user.email || "",
+    .update({
       full_name: user.user_metadata?.full_name || "",
       role,
-    });
+    })
+    .eq("id", user.id);
 
   if (error) {
     return { error: error.message };
@@ -186,23 +205,25 @@ export async function requestPasswordReset(formData: FormData) {
   
   let email = emailOrUsername;
   if (emailOrUsername && !emailOrUsername.includes("@")) {
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("email")
-      .ilike("email", `${emailOrUsername}@%`)
-      .maybeSingle();
+    const adminSupabase = createAdminClient();
+    const { data: resolvedEmail } = await adminSupabase
+      .rpc("get_email_by_username", { username_to_check: emailOrUsername });
       
-    if (profile?.email) {
-      email = profile.email;
+    if (resolvedEmail) {
+      email = resolvedEmail;
     } else {
       return { error: "No account found with this username." };
     }
   }
 
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
+  if (!siteUrl && process.env.NODE_ENV === "production") {
+    throw new Error("NEXT_PUBLIC_SITE_URL environment variable is required in production.");
+  }
   const headersList = await headers();
   const host = headersList.get("host") || "localhost:3000";
   const protocol = headersList.get("x-forwarded-proto") || (host.includes("localhost") ? "http" : "https");
-  const origin = `${protocol}://${host}`;
+  const origin = siteUrl || `${protocol}://${host}`;
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${origin}/api/auth/callback?next=/reset-password`,
@@ -219,8 +240,8 @@ export async function updatePassword(formData: FormData) {
   const supabase = await createClient();
   const password = formData.get("password") as string;
 
-  if (!password || password.length < 6) {
-    return { error: "Password must be at least 6 characters long." };
+  if (!password || password.length < 8) {
+    return { error: "Password must be at least 8 characters long." };
   }
 
   const { error } = await supabase.auth.updateUser({ password });

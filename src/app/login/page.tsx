@@ -92,11 +92,17 @@ export default function LoginPage() {
         try {
           const { data: profile } = await supabase
             .from("profiles")
-            .select("role, provider")
+            .select("role")
             .eq("id", data.user?.id)
             .single();
 
-          const profileProvider = profile?.provider;
+          const { data: privateProfile } = await supabase
+            .from("profiles_private")
+            .select("provider")
+            .eq("id", data.user?.id)
+            .single();
+
+          const profileProvider = privateProfile?.provider;
           const session = (await supabase.auth.getSession()).data.session;
           const sessionProvider = getSessionProvider(session);
 

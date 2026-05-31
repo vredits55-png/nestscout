@@ -28,7 +28,7 @@ export default function ConversationsList({ initialConversations, currentUserId 
     const refreshConversation = async (conversationId: string) => {
       const { data: updated } = await supabase
         .from("conversations")
-        .select("*, property:properties(id, title, images, city, price_per_month), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
+        .select("*, property:properties(id, title, images, city, price_per_month), tenant:profiles!tenant_id(id, full_name, role, avatar_url, created_at), landlord:profiles!landlord_id(id, full_name, role, avatar_url, created_at)")
         .eq("id", conversationId)
         .single();
 

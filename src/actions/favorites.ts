@@ -43,7 +43,7 @@ export async function getFavorites() {
 
   const { data } = await supabase
     .from("favorites")
-    .select("*, property:properties(*, provider:profiles(*))")
+    .select("*, property:properties(*, provider:profiles(id, full_name, role, avatar_url, created_at))")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 

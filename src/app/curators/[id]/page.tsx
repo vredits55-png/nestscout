@@ -29,7 +29,7 @@ export default async function CuratorPortfolioPage({ params }: CuratorPageProps)
   // 1. Fetch Curator Profile
   const { data: curator, error: profileError } = await supabase
     .from("profiles")
-    .select("*")
+    .select("id, full_name, avatar_url, role, created_at")
     .eq("id", id)
     .eq("role", "provider")
     .single();

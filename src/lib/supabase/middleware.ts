@@ -63,14 +63,20 @@ export async function updateSession(request: NextRequest) {
   if (user) {
     const { data: profile } = await supabase
       .from("profiles")
-      .select("role, provider, linked_providers")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    const { data: privateProfile } = await supabase
+      .from("profiles_private")
+      .select("provider, linked_providers")
       .eq("id", user.id)
       .single();
 
     // Treat missing profile or missing role as undecided onboarding
     const role = profile?.role ?? "undecided";
-    const profileProvider = profile?.provider;
-    const linkedProviders = profile?.linked_providers || [];
+    const profileProvider = privateProfile?.provider;
+    const linkedProviders = privateProfile?.linked_providers || [];
     const sessionProvider = getSessionProvider(session);
 
     const isEquivalent = (p1: string, p2: string) => 

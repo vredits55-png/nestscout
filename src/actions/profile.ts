@@ -21,16 +21,26 @@ export async function updateProfile(formData: FormData) {
     return { error: "Full Name is required" };
   }
 
-  const { error } = await supabase
+  const { error: profileError } = await supabase
     .from("profiles")
     .update({
       full_name: fullName,
+    })
+    .eq("id", user.id);
+
+  if (profileError) {
+    return { error: profileError.message };
+  }
+
+  const { error: privateError } = await supabase
+    .from("profiles_private")
+    .update({
       phone: phone || null,
     })
     .eq("id", user.id);
 
-  if (error) {
-    return { error: error.message };
+  if (privateError) {
+    return { error: privateError.message };
   }
 
   revalidatePath("/profile");
@@ -50,7 +60,7 @@ export async function unlinkProvider(provider: string) {
 
   // Fetch the profile
   const { data: profile, error: fetchError } = await supabase
-    .from("profiles")
+    .from("profiles_private")
     .select("linked_providers")
     .eq("id", user.id)
     .single();
@@ -63,9 +73,10 @@ export async function unlinkProvider(provider: string) {
   const updatedLinked = currentLinked.filter((p: string) => p !== provider);
 
   const { error: updateError } = await supabase
-    .from("profiles")
-    .update({ linked_providers: updatedLinked })
-    .eq("id", user.id);
+    .rpc("update_linked_providers", {
+      user_id: user.id,
+      new_providers: updatedLinked,
+    });
 
   if (updateError) {
     return { error: updateError.message };

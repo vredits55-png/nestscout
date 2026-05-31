@@ -34,6 +34,20 @@ export async function createReview({
     return { error: "You cannot write a review for your own property." };
   }
 
+  // Verify stay: the user must have an accepted booking request for this property
+  const { data: booking, error: bookingError } = await supabase
+    .from("booking_requests")
+    .select("id")
+    .eq("tenant_id", user.id)
+    .eq("property_id", propertyId)
+    .eq("status", "accepted")
+    .limit(1)
+    .maybeSingle();
+
+  if (bookingError || !booking) {
+    return { error: "You must have an accepted booking request to review this property." };
+  }
+
   // Insert the review
   const { error } = await supabase.from("reviews").insert({
     property_id: propertyId,
@@ -57,7 +71,7 @@ export async function getReviewsForProperty(propertyId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from("reviews")
-    .select("*, author:profiles(*)")
+    .select("*, author:profiles(id, full_name, role, avatar_url, created_at)")
     .eq("property_id", propertyId)
     .order("created_at", { ascending: false });
 

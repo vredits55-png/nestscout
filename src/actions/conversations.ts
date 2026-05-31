@@ -75,7 +75,7 @@ export async function getOrCreateConversation(propertyId: string, landlordId: st
   return { conversation: data };
 }
 
-export async function sendMessage(conversationId: string, content: string, messageType: string = "text") {
+async function sendInternalMessage(conversationId: string, content: string, messageType: string = "text") {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
@@ -100,6 +100,10 @@ export async function sendMessage(conversationId: string, content: string, messa
   return { success: true };
 }
 
+export async function sendMessage(conversationId: string, content: string) {
+  return sendInternalMessage(conversationId, content, "text");
+}
+
 export async function getConversations() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -107,7 +111,7 @@ export async function getConversations() {
 
   const { data } = await supabase
     .from("conversations")
-    .select("*, property:properties(id, title, images, city, price_per_month), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
+    .select("*, property:properties(id, title, images, city, price_per_month), tenant:profiles!tenant_id(id, full_name, role, avatar_url, created_at), landlord:profiles!landlord_id(id, full_name, role, avatar_url, created_at)")
     .or(`tenant_id.eq.${user.id},landlord_id.eq.${user.id}`)
     .order("updated_at", { ascending: false });
 
@@ -134,7 +138,7 @@ export async function getConversation(id: string) {
 
   const { data } = await supabase
     .from("conversations")
-    .select("*, property:properties(id, title, images, city, price_per_month, provider_id), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
+    .select("*, property:properties(id, title, images, city, price_per_month, provider_id), tenant:profiles!tenant_id(id, full_name, role, avatar_url, created_at), landlord:profiles!landlord_id(id, full_name, role, avatar_url, created_at)")
     .eq("id", id)
     .single();
 
@@ -146,7 +150,7 @@ export async function getMessages(conversationId: string) {
 
   const { data } = await supabase
     .from("messages")
-    .select("*, sender:profiles!sender_id(*)")
+    .select("*, sender:profiles!sender_id(id, full_name, role, avatar_url, created_at)")
     .eq("conversation_id", conversationId)
     .order("created_at", { ascending: true });
 
@@ -241,7 +245,7 @@ export async function createBookingRequest(
     .eq("id", conversationId);
 
   // Send system message
-  await sendMessage(
+  await sendInternalMessage(
     conversationId,
     `📋 Booking Request: ${checkIn} → ${checkOut} (${totalNights} nights) — ₹${proposedPrice}${note ? `\nNote: ${note}` : ""}`,
     "booking_request"
@@ -301,7 +305,7 @@ export async function respondToBooking(bookingId: string, conversationId: string
     })
     .eq("id", conversationId);
 
-  await sendMessage(
+  await sendInternalMessage(
     conversationId,
     accept ? "✅ Booking request has been ACCEPTED! The room is confirmed." : "❌ Booking request has been REJECTED.",
     accept ? "booking_confirmed" : "booking_rejected"
@@ -367,7 +371,7 @@ export async function requestConversationDeletion(conversationId: string) {
   if (error) return { error: error.message };
 
   // Send a system message to notify the other party
-  await sendMessage(
+  await sendInternalMessage(
     conversationId,
     "🗑️ The other party has requested to delete this conversation. Do you agree?",
     "system"
@@ -444,7 +448,7 @@ export async function cancelConversationDeletion(conversationId: string) {
 
   if (error) return { error: error.message };
 
-  await sendMessage(
+  await sendInternalMessage(
     conversationId,
     "🔄 The deletion request has been cancelled/declined.",
     "system"
@@ -526,7 +530,7 @@ export async function cancelBookingRequest(bookingId: string, conversationId: st
     })
     .eq("id", conversationId);
 
-  await sendMessage(
+  await sendInternalMessage(
     conversationId,
     `🚫 Booking request has been CANCELLED by the Renter.`,
     "system"

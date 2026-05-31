@@ -11,7 +11,7 @@ export async function getNotifications() {
 
   const { data, error } = await supabase
     .from("notifications")
-    .select("*, sender:profiles!sender_id(*)")
+    .select("*, sender:profiles!sender_id(id, full_name, role, avatar_url, created_at)")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false });
 

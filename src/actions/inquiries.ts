@@ -11,11 +11,34 @@ export async function sendInquiry(formData: FormData) {
 
   if (!user) return { error: "Not authenticated" };
 
+  const propertyId = formData.get("property_id") as string;
+  const receiverId = formData.get("receiver_id") as string;
+  const message = formData.get("message") as string;
+
+  if (!propertyId || !receiverId) {
+    return { error: "Property ID and Receiver ID are required." };
+  }
+
+  // Verify property and receiver matching
+  const { data: property, error: propError } = await supabase
+    .from("properties")
+    .select("provider_id")
+    .eq("id", propertyId)
+    .single();
+
+  if (propError || !property) {
+    return { error: "Property not found." };
+  }
+
+  if (property.provider_id !== receiverId) {
+    return { error: "Receiver ID does not match the property owner." };
+  }
+
   const { error } = await supabase.from("inquiries").insert({
-    property_id: formData.get("property_id"),
+    property_id: propertyId,
     sender_id: user.id,
-    receiver_id: formData.get("receiver_id"),
-    message: formData.get("message"),
+    receiver_id: receiverId,
+    message,
   });
 
   if (error) return { error: error.message };
@@ -38,7 +61,7 @@ export async function getReceivedInquiries(userId?: string) {
 
   const { data: convs } = await supabase
     .from("conversations")
-    .select("*, property:properties(*), tenant:profiles!tenant_id(*), landlord:profiles!landlord_id(*)")
+    .select("*, property:properties(id, title, images, city, price_per_month), tenant:profiles!tenant_id(id, full_name, role, avatar_url, created_at), landlord:profiles!landlord_id(id, full_name, role, avatar_url, created_at)")
     .eq("landlord_id", finalUserId)
     .order("updated_at", { ascending: false });
 
