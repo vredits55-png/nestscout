@@ -24,7 +24,7 @@ export async function createReview({
     .from("properties")
     .select("provider_id")
     .eq("id", propertyId)
-    .single();
+    .maybeSingle();
 
   if (propError || !property) {
     return { error: "Property not found." };

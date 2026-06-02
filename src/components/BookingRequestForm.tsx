@@ -24,6 +24,7 @@ export default function BookingRequestForm({
   const [note, setNote] = useState("");
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState("");
+  const todayStr = new Date().toLocaleDateString("sv-SE");
 
   const totalNights = checkIn && checkOut
     ? Math.max(1, Math.ceil((new Date(checkOut).getTime() - new Date(checkIn).getTime()) / (1000 * 60 * 60 * 24)))
@@ -88,7 +89,7 @@ export default function BookingRequestForm({
             type="date"
             value={checkIn}
             onChange={(e) => setCheckIn(e.target.value)}
-            min={new Date().toISOString().split("T")[0]}
+            min={todayStr}
             className="input-field"
             required
           />
@@ -102,7 +103,7 @@ export default function BookingRequestForm({
             type="date"
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
-            min={checkIn || new Date().toISOString().split("T")[0]}
+            min={checkIn || todayStr}
             className="input-field"
             required
           />

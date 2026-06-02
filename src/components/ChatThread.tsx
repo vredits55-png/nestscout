@@ -11,7 +11,6 @@ interface ChatThreadProps {
   conversationId: string;
   currentUserId: string;
   initialMessages: Message[];
-  isLandlord: boolean;
   tenant?: Profile;
   landlord?: Profile;
 }

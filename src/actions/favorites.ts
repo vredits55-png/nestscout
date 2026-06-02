@@ -16,7 +16,7 @@ export async function toggleFavorite(propertyId: string) {
     .select("id")
     .eq("user_id", user.id)
     .eq("property_id", propertyId)
-    .single();
+    .maybeSingle();
 
   if (existing) {
     await supabase.from("favorites").delete().eq("id", existing.id);

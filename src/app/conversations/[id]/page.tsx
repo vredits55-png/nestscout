@@ -125,7 +125,6 @@ export default async function ConversationPage({ params }: ConversationPageProps
               conversationId={id}
               currentUserId={user.id}
               initialMessages={messages}
-              isLandlord={isLandlord}
               tenant={conversation.tenant}
               landlord={conversation.landlord}
             />

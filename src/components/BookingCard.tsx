@@ -1,8 +1,9 @@
 "use client";
 
 import { useTransition } from "react";
-import { CheckCircle, XCircle, Calendar, IndianRupee, Moon, Clock } from "lucide-react";
+import { CheckCircle, XCircle, Calendar, Moon, Clock } from "lucide-react";
 import { respondToBooking, cancelBookingRequest } from "@/actions/conversations";
+import { formatCurrency } from "@/lib/utils";
 import type { BookingRequest } from "@/lib/types";
 
 interface BookingCardProps {
@@ -88,8 +89,7 @@ export default function BookingCard({ booking, conversationId, isLandlord, onRes
       <div className="flex items-center justify-between mb-6 bg-surface-container-lowest p-4 rounded-xl border border-outline-variant/20 shadow-ambient">
          <div className="text-sm font-bold text-outline tracking-widest uppercase">Proposed Rate</div>
          <div className="flex items-center gap-1.5 text-2xl font-black text-primary font-headline">
-           <IndianRupee className="w-6 h-6" />
-           {booking.proposed_price}
+           {formatCurrency(booking.proposed_price)}
          </div>
       </div>
 

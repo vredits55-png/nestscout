@@ -1,51 +1,6 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { revalidatePath } from "next/cache";
-
-export async function sendInquiry(formData: FormData) {
-  const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) return { error: "Not authenticated" };
-
-  const propertyId = formData.get("property_id") as string;
-  const receiverId = formData.get("receiver_id") as string;
-  const message = formData.get("message") as string;
-
-  if (!propertyId || !receiverId) {
-    return { error: "Property ID and Receiver ID are required." };
-  }
-
-  // Verify property and receiver matching
-  const { data: property, error: propError } = await supabase
-    .from("properties")
-    .select("provider_id")
-    .eq("id", propertyId)
-    .single();
-
-  if (propError || !property) {
-    return { error: "Property not found." };
-  }
-
-  if (property.provider_id !== receiverId) {
-    return { error: "Receiver ID does not match the property owner." };
-  }
-
-  const { error } = await supabase.from("inquiries").insert({
-    property_id: propertyId,
-    sender_id: user.id,
-    receiver_id: receiverId,
-    message,
-  });
-
-  if (error) return { error: error.message };
-
-  revalidatePath("/provider/inquiries");
-  return { success: true };
-}
 
 export async function getReceivedInquiries(userId?: string) {
   const supabase = await createClient();
@@ -102,11 +57,6 @@ export async function getReceivedInquiries(userId?: string) {
   return Promise.all(promises);
 }
 
-export async function markInquiryRead(id: string) {
-  const supabase = await createClient();
-  await supabase.from("inquiries").update({ is_read: true }).eq("id", id);
-  revalidatePath("/provider/inquiries");
-}
 
 export async function getUnreadCount() {
   const supabase = await createClient();
