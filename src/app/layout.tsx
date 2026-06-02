@@ -8,6 +8,8 @@ import { SpeedInsights } from "@vercel/speed-insights/next";
 import { getUser } from "@/actions/auth";
 import RouteLoader from "@/components/RouteLoader";
 import MotionProvider from "@/components/MotionProvider";
+import AgentationWrapper from "@/components/AgentationWrapper";
+import Footer from "@/components/Footer";
 
 export const metadata: Metadata = {
   title: "NestScout — Curated Editorial Real Estate",
@@ -73,7 +75,9 @@ export default async function RootLayout({
         <main className="flex-1 pt-[72px]">
           <MotionProvider>{children}</MotionProvider>
         </main>
+        <Footer />
         <SpeedInsights />
+        {process.env.NODE_ENV === "development" && <AgentationWrapper />}
       </body>
     </html>
   );

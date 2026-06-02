@@ -1,8 +1,9 @@
 import Link from "next/link";
-import { Search, MapPin, ArrowRight } from "lucide-react";
+import { Search, MapPin } from "lucide-react";
 import { cookies } from "next/headers";
 import { getUser } from "@/actions/auth";
 import Image from "next/image";
+import PropertySlider from "@/components/PropertySlider";
 
 export default async function HomePage() {
   // Conditionally check if the current user is already a provider
@@ -33,7 +34,7 @@ export default async function HomePage() {
           </p>
 
           {/* Editorial Search Bar Link */}
-          <div className="bg-surface-container-lowest rounded-xl p-3 ambient-glow flex flex-col md:flex-row gap-4 items-center animate-fade-in-up delay-150">
+          <div className="bg-surface-container-low/30 backdrop-blur-2xl border border-white/40 rounded-xl p-3 shadow-[0_20px_40px_-5px_rgba(0,110,26,0.08),_inset_0_1px_2px_rgba(255,255,255,0.5)] flex flex-col md:flex-row gap-4 items-center animate-fade-in-up delay-150">
             <Link href="/search" className="flex-1 w-full flex items-center gap-3 px-4 transition-all cursor-pointer">
               <MapPin className="text-outline w-5 h-5 block" />
               <div className="w-full py-3 text-outline-variant font-medium select-none text-left">
@@ -75,18 +76,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* ================== TRUST BANNER ================== */}
-      <section className="bg-inverse-surface py-16 mt-12 overflow-hidden">
-        <div className="max-w-[1440px] mx-auto px-8 flex flex-col md:flex-row items-center justify-between gap-12">
-          <div className="text-surface-variant font-headline text-lg uppercase tracking-widest opacity-60">Featured &amp; Trusted By</div>
-          <div className="flex flex-wrap justify-center gap-12 grayscale opacity-40">
-            <div className="text-white text-2xl font-black italic">ARCH-DIGEST</div>
-            <div className="text-white text-2xl font-black italic">DWELL</div>
-            <div className="text-white text-2xl font-black italic">VOGUE LIVING</div>
-            <div className="text-white text-2xl font-black italic">CURBED</div>
-          </div>
-        </div>
-      </section>
+      {/* ================== PROPERTIES SLIDER ================== */}
+      <PropertySlider />
 
       {/* ================== TESTIMONIALS (Editorial Style) ================== */}
       <section className="bg-surface-container-low py-24 px-8 overflow-hidden">
@@ -163,7 +154,6 @@ export default async function HomePage() {
             <div className="flex flex-col sm:flex-row justify-center gap-6 animate-fade-in-up delay-150">
               <Link href="/search" className="btn btn-primary text-lg px-8 py-4">
                 Start Searching
-                <ArrowRight className="w-5 h-5" />
               </Link>
               <Link href={listUrl} className="btn btn-ghost text-lg px-8 py-4">
                 List a Property
@@ -173,50 +163,6 @@ export default async function HomePage() {
          {/* Decorative blob */}
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/5 rounded-full blur-[100px] -z-0"></div>
       </section>
-
-      {/* ================== FOOTER ================== */}
-      <footer className="bg-inverse-surface text-on-primary-container">
-        <div className="w-full py-16 px-8 flex flex-col md:flex-row justify-between items-start max-w-[1440px] mx-auto gap-12">
-          <div className="space-y-6 max-w-sm">
-            <div className="text-white font-bold text-3xl font-headline flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-white shadow-xl p-0.5">
-                <img src="/logo.png" alt="NestScout Logo" className="w-full h-full object-contain" />
-              </div>
-              NestScout
-            </div>
-            <p className="text-white/60 leading-relaxed font-body">
-                Curating the world&apos;s most evocative living spaces for the modern individual. A new standard in residential discovery.
-            </p>
-          </div>
-          <div className="grid grid-cols-2 gap-16 md:gap-24 w-full md:w-auto">
-            <div className="space-y-4">
-            <h4 className="text-white font-bold text-sm uppercase tracking-widest font-headline">Company</h4>
-            <nav className="flex flex-col gap-3 font-body">
-              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/vision">The Vision</Link>
-              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/standards">Editorial Standards</Link>
-              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/careers">Careers</Link>
-            </nav>
-            </div>
-            <div className="space-y-4">
-            <h4 className="text-white font-bold text-sm uppercase tracking-widest font-headline">Support</h4>
-            <nav className="flex flex-col gap-3 font-body">
-              <div className="flex flex-col gap-1">
-                <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/contact">Contact Us</Link>
-                <a href="mailto:sandarbhs102@gmail.com" className="text-white/40 hover:text-white transition-colors text-xs">sandarbhs102@gmail.com</a>
-                <a href="tel:+916387360511" className="text-white/40 hover:text-white transition-colors text-xs">+91 638 736 0511</a>
-              </div>
-              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold mt-2" href="/privacy">Privacy Policy</Link>
-              <Link className="text-white/60 hover:text-primary-fixed transition-colors text-sm uppercase tracking-widest font-semibold" href="/terms">Terms</Link>
-            </nav>
-            </div>
-          </div>
-        </div>
-        <div className="max-w-[1440px] mx-auto px-8 py-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-white/50 text-xs uppercase tracking-widest font-bold">
-            © 2026 NestScout. Part of The Curated Hearth editorial network.
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
