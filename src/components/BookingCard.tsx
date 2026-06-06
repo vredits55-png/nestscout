@@ -47,24 +47,27 @@ export default function BookingCard({ booking, conversationId, isLandlord, onRes
     cancelled: "border-outline-variant/30 bg-surface-container-low",
   };
 
-  const statusLabels: Record<string, { icon: React.ElementType; text: string; color: string }> = {
+  const statusLabelMap: Record<string, { icon: React.ElementType<any>; text: string; color: string }> = {
     pending: { icon: Clock, text: "Awaiting Review", color: "text-primary" },
     accepted: { icon: CheckCircle, text: "Confirmed", color: "text-primary-container" },
     rejected: { icon: XCircle, text: "Declined", color: "text-error" },
     cancelled: { icon: XCircle, text: "Withdrawn", color: "text-outline" },
   };
 
-  const status = statusLabels[booking.status] || statusLabels.pending;
-  const StatusIcon = status.icon;
+  const statusKey = (booking.status as any) || "pending";
+  const statusData = statusLabelMap[statusKey] || statusLabelMap.pending;
+  const StatusIcon = statusData.icon as React.FC<{ className?: string }>;
+  const statusText = statusData.text;
+  const statusColor = statusData.color;
 
   return (
     <div className={`rounded-3xl p-6 shadow-ambient border transition-all ${statusColors[booking.status] || ""}`}>
       
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-outline-variant/20">
         <h4 className="font-black font-headline text-on-surface text-xl">Lease Proposal</h4>
-        <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full bg-surface-container-lowest shadow-sm ${status.color}`}>
+        <div className={`flex items-center gap-2 text-xs font-bold uppercase tracking-widest px-4 py-1.5 rounded-full bg-surface-container-lowest shadow-sm ${statusColor}`}>
           <StatusIcon className="w-4 h-4" />
-          {status.text}
+          {statusText}
         </div>
       </div>
 

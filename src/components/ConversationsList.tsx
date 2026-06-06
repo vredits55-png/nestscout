@@ -154,7 +154,7 @@ export default function ConversationsList({ initialConversations, currentUserId 
     };
   }, [currentUserId]);
 
-  const statusConfig: Record<string, { icon: React.ElementType; label: string; color: string }> = {
+  const statusConfig: Record<string, { icon: React.ElementType<any>; label: string; color: string }> = {
     active: { icon: MessageCircle, label: "Active", color: "text-primary" },
     booking_requested: { icon: Clock, label: "Booking Pending", color: "text-cta" },
     confirmed: { icon: CheckCircle, label: "Confirmed", color: "text-success" },
@@ -180,8 +180,8 @@ export default function ConversationsList({ initialConversations, currentUserId 
     <div className="space-y-3 stagger-children">
       {conversations.map((conv: Conversation) => {
         const otherUser = currentUserId === conv.tenant_id ? conv.landlord : conv.tenant;
-        const config = statusConfig[conv.status] || statusConfig.active;
-        const StatusIcon = config.icon;
+        const config = statusConfig[(conv.status as any) || "active"];
+        const StatusIcon = config.icon as React.FC<{ className?: string }>;
 
         const isUnread = conv.latest_message && 
                          conv.latest_message.sender_id !== currentUserId && 

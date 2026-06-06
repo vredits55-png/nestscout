@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import { getUser } from "@/actions/auth";
 import Image from "next/image";
 import PropertySlider from "@/components/PropertySlider";
+import MotionGraphicHero from "@/components/MotionGraphicHero";
 
 export default async function HomePage() {
   // Conditionally check if the current user is already a provider
@@ -23,8 +24,13 @@ export default async function HomePage() {
 
   return (
     <div className="bg-transparent">
-      {/* ================== HERO SECTION ================== */}
-      <section className="relative px-8 py-12 md:py-24 max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[90vh]">
+      {/* ================== 3D MOTION GRAPHIC HERO ================== */}
+      <section className="relative w-full">
+        <MotionGraphicHero />
+      </section>
+
+      {/* ================== TRADITIONAL HERO SECTION ================== */}
+      <section className="relative px-8 py-12 md:py-24 max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 items-center min-h-[60vh]">
         <div className="lg:col-span-6 space-y-8 animate-fade-in-up">
           <h1 className="text-5xl md:text-7xl font-headline font-extrabold text-on-surface leading-[1.05] tracking-tight">
             Find a home that <span className="text-primary italic">speaks</span> to you.
