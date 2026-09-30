@@ -175,7 +175,7 @@ export default function ConversationSidebar({
       )}
 
       {/* Deletion Workflow */}
-      <hr className="border-outline-variant/30 my-8" />
+      <hr className="border-outline-variant/20 my-6" />
       <DeleteConversationButton
         conversationId={conversationId}
         currentUserId={currentUserId}

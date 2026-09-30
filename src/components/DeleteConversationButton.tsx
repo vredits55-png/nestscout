@@ -81,23 +81,31 @@ export default function DeleteConversationButton({
   // If Modal
   if (showConfirm && deletionStatus === "none") {
     return (
-      <div className="flex flex-col gap-2 p-3 bg-danger/5 border border-danger/20 rounded-xl">
-        <p className="text-sm font-medium text-danger">Request Deletion?</p>
-        <div className="flex flex-col sm:flex-row gap-2 mt-2">
-          <button
-            onClick={handleRequest}
-            disabled={activeAction !== null}
-            className="btn py-1.5 px-3 bg-danger text-white hover:bg-danger/90 border-transparent flex-1 text-xs"
-          >
-            {activeAction === "request" ? "Requesting..." : "Confirm"}
-          </button>
-          <button
-            onClick={() => setShowConfirm(false)}
-            disabled={activeAction !== null}
-            className="btn btn-outline py-1.5 px-3 flex-1 text-xs"
-          >
-            Cancel
-          </button>
+      <div className="pt-2">
+        <div className="flex flex-col gap-3 p-4 bg-surface-container-low/70 border border-outline-variant/25 rounded-2xl animate-scale-in shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-bold font-headline uppercase tracking-wider text-error">
+            <AlertTriangle className="w-4 h-4 shrink-0 text-error" />
+            <span>Request Deletion?</span>
+          </div>
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            The other party must confirm before this conversation is permanently deleted.
+          </p>
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={handleRequest}
+              disabled={activeAction !== null}
+              className="flex-1 py-2 px-3 bg-error text-white hover:bg-error/90 rounded-xl text-xs font-headline font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              {activeAction === "request" ? "Requesting..." : "Confirm"}
+            </button>
+            <button
+              onClick={() => setShowConfirm(false)}
+              disabled={activeAction !== null}
+              className="flex-1 py-2 px-3 bg-surface-container hover:bg-surface-container-high text-on-surface-variant border border-outline-variant/20 rounded-xl text-xs font-headline font-bold transition-all cursor-pointer disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -106,34 +114,38 @@ export default function DeleteConversationButton({
   // State 1: No deletion requested. Anyone can initiate.
   if (deletionStatus === "none") {
     return (
-      <button
-        onClick={() => setShowConfirm(true)}
-        className="btn btn-outline border-danger/20 text-danger hover:bg-danger hover:text-white"
-      >
-        <Trash2 className="w-4 h-4" />
-        Delete Conversation
-      </button>
+      <div className="pt-2">
+        <button
+          onClick={() => setShowConfirm(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-xs font-bold font-headline uppercase tracking-wider text-outline hover:text-error bg-surface-container-low/60 hover:bg-error/10 border border-outline-variant/20 hover:border-error/20 transition-all duration-200 cursor-pointer group"
+        >
+          <Trash2 className="w-3.5 h-3.5 text-outline/70 group-hover:text-error transition-colors" />
+          <span>Delete Conversation</span>
+        </button>
+      </div>
     );
   }
 
   // State 2: Deletion requested BY current user
   if (deletionStatus === "requested" && deletionRequestedBy === currentUserId) {
     return (
-      <div className="flex flex-col gap-3 p-4 bg-danger/5 border border-danger/20 rounded-xl">
-        <div className="flex items-center gap-2 text-danger text-sm font-medium">
-          <AlertTriangle className="w-4 h-4" />
-          Pending Deletion
+      <div className="pt-2">
+        <div className="flex flex-col gap-3 p-4 bg-surface-container-low/70 border border-outline-variant/25 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-bold font-headline uppercase tracking-wider text-outline">
+            <AlertTriangle className="w-4 h-4 text-tertiary shrink-0" />
+            <span>Pending Deletion</span>
+          </div>
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            You requested to delete this conversation. Waiting for the other party to confirm.
+          </p>
+          <button
+            onClick={() => handleCancel("cancel")}
+            disabled={activeAction !== null}
+            className="w-full py-2 px-3 bg-surface-container-low hover:bg-surface-container text-on-surface-variant hover:text-error border border-outline-variant/25 hover:border-error/20 rounded-xl text-xs font-headline font-bold transition-all cursor-pointer disabled:opacity-50"
+          >
+            {activeAction === "cancel" ? "Cancelling..." : "Cancel Deletion Request"}
+          </button>
         </div>
-        <p className="text-sm text-text-muted">
-          You have requested to delete this conversation. Waiting for the other party to confirm.
-        </p>
-        <button
-          onClick={() => handleCancel("cancel")}
-          disabled={activeAction !== null}
-          className="btn btn-outline border-danger/20 text-danger hover:bg-danger hover:text-white w-full text-xs"
-        >
-          {activeAction === "cancel" ? "Cancelling..." : "Cancel Deletion Request"}
-        </button>
       </div>
     );
   }
@@ -141,29 +153,31 @@ export default function DeleteConversationButton({
   // State 3: Deletion requested BY OTHER user
   if (deletionStatus === "requested" && deletionRequestedBy !== currentUserId) {
     return (
-      <div className="flex flex-col gap-3 p-4 bg-danger/5 border border-danger/20 rounded-xl">
-        <div className="flex items-center gap-2 text-danger text-sm font-medium">
-          <AlertTriangle className="w-4 h-4" />
-          Deletion Requested
-        </div>
-        <p className="text-sm text-text-muted">
-          The other party wants to delete this conversation. Do you agree? This action cannot be undone.
-        </p>
-        <div className="flex flex-col sm:flex-row gap-2 mt-2">
-          <button
-            onClick={handleConfirm}
-            disabled={activeAction !== null}
-            className="btn btn-primary flex-1 bg-danger hover:bg-danger/90 border-transparent text-white"
-          >
-            {activeAction === "delete" ? "Deleting..." : "Yes, Delete"}
-          </button>
-          <button
-            onClick={() => handleCancel("decline")}
-            disabled={activeAction !== null}
-            className="btn btn-outline flex-1 text-xs"
-          >
-            {activeAction === "decline" ? "Declining..." : "Decline"}
-          </button>
+      <div className="pt-2">
+        <div className="flex flex-col gap-3 p-4 bg-surface-container-low/70 border border-error/20 rounded-2xl shadow-sm">
+          <div className="flex items-center gap-2 text-xs font-bold font-headline uppercase tracking-wider text-error">
+            <AlertTriangle className="w-4 h-4 text-error shrink-0" />
+            <span>Deletion Requested</span>
+          </div>
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            The other party has requested to delete this conversation permanently.
+          </p>
+          <div className="flex items-center gap-2 pt-1">
+            <button
+              onClick={handleConfirm}
+              disabled={activeAction !== null}
+              className="flex-1 py-2 px-3 bg-error text-white hover:bg-error/90 rounded-xl text-xs font-headline font-bold transition-all shadow-sm cursor-pointer disabled:opacity-50"
+            >
+              {activeAction === "delete" ? "Deleting..." : "Yes, Delete"}
+            </button>
+            <button
+              onClick={() => handleCancel("decline")}
+              disabled={activeAction !== null}
+              className="flex-1 py-2 px-3 bg-surface-container hover:bg-surface-container-high text-on-surface-variant border border-outline-variant/20 rounded-xl text-xs font-headline font-bold transition-all cursor-pointer disabled:opacity-50"
+            >
+              {activeAction === "decline" ? "Declining..." : "Decline"}
+            </button>
+          </div>
         </div>
       </div>
     );
